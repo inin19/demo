@@ -1,7 +1,11 @@
 <div class="container-fluid">
+
+    <div (click)="changeData(1)">json1</div>
+    <div (click)="changeData(2)">json2</div>
     <div class="row">
-        <div class="col-md-6">
-                <app-projection-chart></app-projection-chart>
+
+        <div class="col">
+            <app-projection-chart *ngIf="json" [jsonData]="json"></app-projection-chart>
         </div>
     </div>
 </div>

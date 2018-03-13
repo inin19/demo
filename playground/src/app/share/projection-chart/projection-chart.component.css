@@ -1,5 +1,19 @@
 #chart{
-
     height: 500px;
-    background-color: #f7f7f7; 
+    background-color: whitesmoke;
 }
+
+
+#selector{
+
+    height: 200px;
+    background-color:cornsilk; 
+}
+ 
+
+.priodButton {
+    height: 60px;
+    width: 100px;
+}
+
+

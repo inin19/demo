@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, Input, ElementRef } from '@angular/core';
+import { Component, OnInit, OnChanges, ViewChild, Input, ElementRef } from '@angular/core';
 import { ProjectionData } from './../model/projectionData.model';
 import * as d3 from 'd3';
 
@@ -8,15 +8,17 @@ import * as d3 from 'd3';
   templateUrl: './projection-chart.component.html',
   styleUrls: ['./projection-chart.component.css']
 })
-export class ProjectionChartComponent implements OnInit {
+export class ProjectionChartComponent implements OnInit, OnChanges {
 
-  private jsonData: Array<any>;
+  // private jsonData: Array<any>;
   private projectionData: ProjectionData;
   private graphData: Array<any>;
   private categories: Array<string>;
 
   // #chart referentce in the template
   @ViewChild('chart') private chartContainer: ElementRef;
+
+  @Input() private jsonData: Array<any>;
 
   private margin: any = { top: 30, right: 60, bottom: 30, left: 60 };
   private chart: any;
@@ -33,1373 +35,72 @@ export class ProjectionChartComponent implements OnInit {
 
   constructor() { }
 
+
+  ngOnChanges() {
+
+    // update data
+
+    if (this.chart) {
+      console.log('data changes');
+      console.log(this.jsonData);
+
+      this.createChartData();
+
+
+      this.updateChart2(this.jsonData, this.categories, undefined, undefined, undefined);
+
+
+
+
+    }
+
+  }
+
   ngOnInit() {
+    this.createChartData();
+    this.createChart();
+    this.initialChart();
+
+    this.createSelector();
+
+  }
+
+
+  createSelector() {
+
+    // VERY IMPORTANT Capture class instance
+    const _this = this;
+
+    const selector = d3.select('#selector').selectAll('button')
+      .data(this.projectionData.getGraphPeriod())
+      .enter()
+      .append('button')
+      .classed('priodButton', true)
+      .text((d) => d === 0 ? 'Current Policy' : 'period ' + d)
+      .on('click', function (d) {
+        console.log(d);
+        // console.log(_this);
+
+        _this.updateChart2(_this.jsonData, _this.categories, undefined, [1], undefined);
+
+      });
+
+  }
+
+
+  createChartData() {
     this.categories = ['EMPLOYER_PREMIUM', 'FUNDING_GAP', 'MEMBER_PREMIUM', 'TAX', 'FEES'];
-
-    this.jsonData = [
-      {
-        'period': 0,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'TOTAL_LIVES',
-        'value': 426
-      },
-      {
-        'period': 1,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'TOTAL_LIVES',
-        'value': 430.26
-      },
-      {
-        'period': 2,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'TOTAL_LIVES',
-        'value': 434.56
-      },
-      {
-        'period': 3,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'TOTAL_LIVES',
-        'value': 438.91
-      },
-      {
-        'period': 4,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'TOTAL_LIVES',
-        'value': 443.3
-      },
-      {
-        'period': 5,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'TOTAL_LIVES',
-        'value': 447.73
-      },
-      {
-        'period': 0,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'TOTAL_COST',
-        'value': 3195000
-      },
-      {
-        'period': 1,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'TOTAL_COST',
-        'value': 3710992.5
-      },
-      {
-        'period': 2,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'TOTAL_COST',
-        'value': 3935507.55
-      },
-      {
-        'period': 3,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'TOTAL_COST',
-        'value': 4173605.75
-      },
-      {
-        'period': 4,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'TOTAL_COST',
-        'value': 4426108.9
-      },
-      {
-        'period': 5,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'TOTAL_COST',
-        'value': 4693888.49
-      },
-      {
-        'period': 0,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'EMPLOYER_PREMIUM',
-        'value': 2556000
-      },
-      {
-        'period': 1,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'EMPLOYER_PREMIUM',
-        'value': 2633191.2
-      },
-      {
-        'period': 2,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'EMPLOYER_PREMIUM',
-        'value': 2712713.57
-      },
-      {
-        'period': 3,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'EMPLOYER_PREMIUM',
-        'value': 2794637.52
-      },
-      {
-        'period': 4,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'EMPLOYER_PREMIUM',
-        'value': 2879035.58
-      },
-      {
-        'period': 5,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'EMPLOYER_PREMIUM',
-        'value': 2965982.45
-      },
-      {
-        'period': 0,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'MEMBER_PREMIUM',
-        'value': 639000
-      },
-      {
-        'period': 1,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'MEMBER_PREMIUM',
-        'value': 651843.9
-      },
-      {
-        'period': 2,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'MEMBER_PREMIUM',
-        'value': 664945.96
-      },
-      {
-        'period': 3,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'MEMBER_PREMIUM',
-        'value': 678311.38
-      },
-      {
-        'period': 4,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'MEMBER_PREMIUM',
-        'value': 691945.43
-      },
-      {
-        'period': 5,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'MEMBER_PREMIUM',
-        'value': 705853.54
-      },
-      {
-        'period': 0,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'TAX',
-        'value': 402010.3
-      },
-      {
-        'period': 1,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'TAX',
-        'value': 466741.35
-      },
-      {
-        'period': 2,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'TAX',
-        'value': 494914.01
-      },
-      {
-        'period': 3,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'TAX',
-        'value': 524790.48
-      },
-      {
-        'period': 4,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'TAX',
-        'value': 556473.8
-      },
-      {
-        'period': 5,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'TAX',
-        'value': 590073.31
-      },
-      {
-        'period': 0,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'FEES',
-        'value': 10650
-      },
-      {
-        'period': 1,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'FEES',
-        'value': 10756.5
-      },
-      {
-        'period': 2,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'FEES',
-        'value': 10864.07
-      },
-      {
-        'period': 3,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'FEES',
-        'value': 10972.71
-      },
-      {
-        'period': 4,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'FEES',
-        'value': 11082.43
-      },
-      {
-        'period': 5,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'FEES',
-        'value': 11193.26
-      },
-      {
-        'period': 0,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'ESTIMATED_OOP_COST',
-        'value': 319500
-      },
-      {
-        'period': 1,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'ESTIMATED_OOP_COST',
-        'value': 337435.18
-      },
-      {
-        'period': 2,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'ESTIMATED_OOP_COST',
-        'value': 360819.48
-      },
-      {
-        'period': 3,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'ESTIMATED_OOP_COST',
-        'value': 382766.13
-      },
-      {
-        'period': 4,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'ESTIMATED_OOP_COST',
-        'value': 406887.11
-      },
-      {
-        'period': 5,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'ESTIMATED_OOP_COST',
-        'value': 439969.13
-      },
-      {
-        'period': 0,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'FUNDING_GAP',
-        'value': 0
-      },
-      {
-        'period': 1,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'FUNDING_GAP',
-        'value': 425957.4
-      },
-      {
-        'period': 2,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'FUNDING_GAP',
-        'value': 557848.01
-      },
-      {
-        'period': 3,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'FUNDING_GAP',
-        'value': 700656.85
-      },
-      {
-        'period': 4,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'FUNDING_GAP',
-        'value': 855127.89
-      },
-      {
-        'period': 5,
-        'planId': 1,
-        'currentModified': 'Current',
-        'category': 'FUNDING_GAP',
-        'value': 1022052.5
-      },
-      {
-        'period': 0,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'TOTAL_LIVES',
-        'value': 3561642.65
-      },
-      {
-        'period': 1,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'TOTAL_LIVES',
-        'value': 430.26
-      },
-      {
-        'period': 2,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'TOTAL_LIVES',
-        'value': 434.56
-      },
-      {
-        'period': 3,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'TOTAL_LIVES',
-        'value': 438.91
-      },
-      {
-        'period': 4,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'TOTAL_LIVES',
-        'value': 443.3
-      },
-      {
-        'period': 5,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'TOTAL_LIVES',
-        'value': 447.73
-      },
-      {
-        'period': 0,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'TOTAL_COST',
-        'value': 0
-      },
-      {
-        'period': 1,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'TOTAL_COST',
-        'value': 3710992.5
-      },
-      {
-        'period': 2,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'TOTAL_COST',
-        'value': 3935507.55
-      },
-      {
-        'period': 3,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'TOTAL_COST',
-        'value': 4173605.75
-      },
-      {
-        'period': 4,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'TOTAL_COST',
-        'value': 4426108.9
-      },
-      {
-        'period': 5,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'TOTAL_COST',
-        'value': 4693888.49
-      },
-      {
-        'period': 0,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'EMPLOYER_PREMIUM',
-        'value': 0
-      },
-      {
-        'period': 1,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'EMPLOYER_PREMIUM',
-        'value': 2633191.2
-      },
-      {
-        'period': 2,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'EMPLOYER_PREMIUM',
-        'value': 2712713.57
-      },
-      {
-        'period': 3,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'EMPLOYER_PREMIUM',
-        'value': 2794637.52
-      },
-      {
-        'period': 4,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'EMPLOYER_PREMIUM',
-        'value': 2879035.58
-      },
-      {
-        'period': 5,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'EMPLOYER_PREMIUM',
-        'value': 2965982.45
-      },
-      {
-        'period': 0,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'MEMBER_PREMIUM',
-        'value': 0
-      },
-      {
-        'period': 1,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'MEMBER_PREMIUM',
-        'value': 651843.9
-      },
-      {
-        'period': 2,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'MEMBER_PREMIUM',
-        'value': 664945.96
-      },
-      {
-        'period': 3,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'MEMBER_PREMIUM',
-        'value': 678311.38
-      },
-      {
-        'period': 4,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'MEMBER_PREMIUM',
-        'value': 691945.43
-      },
-      {
-        'period': 5,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'MEMBER_PREMIUM',
-        'value': 705853.54
-      },
-      {
-        'period': 0,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'TAX',
-        'value': 0
-      },
-      {
-        'period': 1,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'TAX',
-        'value': 466741.35
-      },
-      {
-        'period': 2,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'TAX',
-        'value': 494914.01
-      },
-      {
-        'period': 3,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'TAX',
-        'value': 524790.48
-      },
-      {
-        'period': 4,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'TAX',
-        'value': 556473.8
-      },
-      {
-        'period': 5,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'TAX',
-        'value': 590073.31
-      },
-      {
-        'period': 0,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'FEES',
-        'value': 0
-      },
-      {
-        'period': 1,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'FEES',
-        'value': 10756.5
-      },
-      {
-        'period': 2,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'FEES',
-        'value': 10864.07
-      },
-      {
-        'period': 3,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'FEES',
-        'value': 10972.71
-      },
-      {
-        'period': 4,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'FEES',
-        'value': 11082.43
-      },
-      {
-        'period': 5,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'FEES',
-        'value': 11193.26
-      },
-      {
-        'period': 0,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'ESTIMATED_OOP_COST',
-        'value': 0
-      },
-      {
-        'period': 1,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'ESTIMATED_OOP_COST',
-        'value': 337435.18
-      },
-      {
-        'period': 2,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'ESTIMATED_OOP_COST',
-        'value': 360819.48
-      },
-      {
-        'period': 3,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'ESTIMATED_OOP_COST',
-        'value': 382766.13
-      },
-      {
-        'period': 4,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'ESTIMATED_OOP_COST',
-        'value': 406887.11
-      },
-      {
-        'period': 5,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'ESTIMATED_OOP_COST',
-        'value': 439969.13
-      },
-      {
-        'period': 0,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'FUNDING_GAP',
-        'value': 0
-      },
-      {
-        'period': 1,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'FUNDING_GAP',
-        'value': 425957.4
-      },
-      {
-        'period': 2,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'FUNDING_GAP',
-        'value': 557848.01
-      },
-      {
-        'period': 3,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'FUNDING_GAP',
-        'value': 700656.85
-      },
-      {
-        'period': 4,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'FUNDING_GAP',
-        'value': 855127.89
-      },
-      {
-        'period': 5,
-        'planId': 1,
-        'currentModified': 'Modified',
-        'category': 'FUNDING_GAP',
-        'value': 1022052.5
-      },
-      {
-        'period': 0,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'TOTAL_LIVES',
-        'value': 426
-      },
-      {
-        'period': 1,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'TOTAL_LIVES',
-        'value': 430.26
-      },
-      {
-        'period': 2,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'TOTAL_LIVES',
-        'value': 434.56
-      },
-      {
-        'period': 3,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'TOTAL_LIVES',
-        'value': 438.91
-      },
-      {
-        'period': 4,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'TOTAL_LIVES',
-        'value': 443.3
-      },
-      {
-        'period': 5,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'TOTAL_LIVES',
-        'value': 447.73
-      },
-      {
-        'period': 0,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'TOTAL_COST',
-        'value': 3195000
-      },
-      {
-        'period': 1,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'TOTAL_COST',
-        'value': 3710992.5
-      },
-      {
-        'period': 2,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'TOTAL_COST',
-        'value': 3935507.55
-      },
-      {
-        'period': 3,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'TOTAL_COST',
-        'value': 4173605.75
-      },
-      {
-        'period': 4,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'TOTAL_COST',
-        'value': 4426108.9
-      },
-      {
-        'period': 5,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'TOTAL_COST',
-        'value': 4693888.49
-      },
-      {
-        'period': 0,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'EMPLOYER_PREMIUM',
-        'value': 2556000
-      },
-      {
-        'period': 1,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'EMPLOYER_PREMIUM',
-        'value': 2633191.2
-      },
-      {
-        'period': 2,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'EMPLOYER_PREMIUM',
-        'value': 2712713.57
-      },
-      {
-        'period': 3,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'EMPLOYER_PREMIUM',
-        'value': 2794637.52
-      },
-      {
-        'period': 4,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'EMPLOYER_PREMIUM',
-        'value': 2879035.58
-      },
-      {
-        'period': 5,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'EMPLOYER_PREMIUM',
-        'value': 2965982.45
-      },
-      {
-        'period': 0,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'MEMBER_PREMIUM',
-        'value': 639000
-      },
-      {
-        'period': 1,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'MEMBER_PREMIUM',
-        'value': 651843.9
-      },
-      {
-        'period': 2,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'MEMBER_PREMIUM',
-        'value': 664945.96
-      },
-      {
-        'period': 3,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'MEMBER_PREMIUM',
-        'value': 678311.38
-      },
-      {
-        'period': 4,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'MEMBER_PREMIUM',
-        'value': 691945.43
-      },
-      {
-        'period': 5,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'MEMBER_PREMIUM',
-        'value': 705853.54
-      },
-      {
-        'period': 0,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'TAX',
-        'value': 402010.3
-      },
-      {
-        'period': 1,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'TAX',
-        'value': 466741.35
-      },
-      {
-        'period': 2,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'TAX',
-        'value': 494914.01
-      },
-      {
-        'period': 3,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'TAX',
-        'value': 524790.48
-      },
-      {
-        'period': 4,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'TAX',
-        'value': 556473.8
-      },
-      {
-        'period': 5,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'TAX',
-        'value': 590073.31
-      },
-      {
-        'period': 0,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'FEES',
-        'value': 10650
-      },
-      {
-        'period': 1,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'FEES',
-        'value': 10756.5
-      },
-      {
-        'period': 2,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'FEES',
-        'value': 10864.07
-      },
-      {
-        'period': 3,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'FEES',
-        'value': 10972.71
-      },
-      {
-        'period': 4,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'FEES',
-        'value': 11082.43
-      },
-      {
-        'period': 5,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'FEES',
-        'value': 11193.26
-      },
-      {
-        'period': 0,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'ESTIMATED_OOP_COST',
-        'value': 319500
-      },
-      {
-        'period': 1,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'ESTIMATED_OOP_COST',
-        'value': 337435.18
-      },
-      {
-        'period': 2,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'ESTIMATED_OOP_COST',
-        'value': 360819.48
-      },
-      {
-        'period': 3,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'ESTIMATED_OOP_COST',
-        'value': 382766.13
-      },
-      {
-        'period': 4,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'ESTIMATED_OOP_COST',
-        'value': 406887.11
-      },
-      {
-        'period': 5,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'ESTIMATED_OOP_COST',
-        'value': 439969.13
-      },
-      {
-        'period': 0,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'FUNDING_GAP',
-        'value': 0
-      },
-      {
-        'period': 1,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'FUNDING_GAP',
-        'value': 425957.4
-      },
-      {
-        'period': 2,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'FUNDING_GAP',
-        'value': 557848.01
-      },
-      {
-        'period': 3,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'FUNDING_GAP',
-        'value': 700656.85
-      },
-      {
-        'period': 4,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'FUNDING_GAP',
-        'value': 855127.89
-      },
-      {
-        'period': 5,
-        'planId': 2,
-        'currentModified': 'Current',
-        'category': 'FUNDING_GAP',
-        'value': 1022052.5
-      },
-      {
-        'period': 0,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'TOTAL_LIVES',
-        'value': 0
-      },
-      {
-        'period': 1,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'TOTAL_LIVES',
-        'value': 430.26
-      },
-      {
-        'period': 2,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'TOTAL_LIVES',
-        'value': 434.56
-      },
-      {
-        'period': 3,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'TOTAL_LIVES',
-        'value': 438.91
-      },
-      {
-        'period': 4,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'TOTAL_LIVES',
-        'value': 443.3
-      },
-      {
-        'period': 5,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'TOTAL_LIVES',
-        'value': 447.73
-      },
-      {
-        'period': 0,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'TOTAL_COST',
-        'value': 0
-      },
-      {
-        'period': 1,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'TOTAL_COST',
-        'value': 3710992.5
-      },
-      {
-        'period': 2,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'TOTAL_COST',
-        'value': 3935507.55
-      },
-      {
-        'period': 3,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'TOTAL_COST',
-        'value': 4173605.75
-      },
-      {
-        'period': 4,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'TOTAL_COST',
-        'value': 4426108.9
-      },
-      {
-        'period': 5,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'TOTAL_COST',
-        'value': 4693888.49
-      },
-      {
-        'period': 0,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'EMPLOYER_PREMIUM',
-        'value': 0
-      },
-      {
-        'period': 1,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'EMPLOYER_PREMIUM',
-        'value': 2633191.2
-      },
-      {
-        'period': 2,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'EMPLOYER_PREMIUM',
-        'value': 2712713.57
-      },
-      {
-        'period': 3,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'EMPLOYER_PREMIUM',
-        'value': 2794637.52
-      },
-      {
-        'period': 4,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'EMPLOYER_PREMIUM',
-        'value': 2879035.58
-      },
-      {
-        'period': 5,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'EMPLOYER_PREMIUM',
-        'value': 2965982.45
-      },
-      {
-        'period': 0,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'MEMBER_PREMIUM',
-        'value': 0
-      },
-      {
-        'period': 1,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'MEMBER_PREMIUM',
-        'value': 651843.9
-      },
-      {
-        'period': 2,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'MEMBER_PREMIUM',
-        'value': 664945.96
-      },
-      {
-        'period': 3,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'MEMBER_PREMIUM',
-        'value': 678311.38
-      },
-      {
-        'period': 4,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'MEMBER_PREMIUM',
-        'value': 691945.43
-      },
-      {
-        'period': 5,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'MEMBER_PREMIUM',
-        'value': 705853.54
-      },
-      {
-        'period': 0,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'TAX',
-        'value': 0
-      },
-      {
-        'period': 1,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'TAX',
-        'value': 466741.35
-      },
-      {
-        'period': 2,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'TAX',
-        'value': 494914.01
-      },
-      {
-        'period': 3,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'TAX',
-        'value': 524790.48
-      },
-      {
-        'period': 4,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'TAX',
-        'value': 556473.8
-      },
-      {
-        'period': 5,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'TAX',
-        'value': 590073.31
-      },
-      {
-        'period': 0,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'FEES',
-        'value': 0
-      },
-      {
-        'period': 1,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'FEES',
-        'value': 10756.5
-      },
-      {
-        'period': 2,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'FEES',
-        'value': 10864.07
-      },
-      {
-        'period': 3,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'FEES',
-        'value': 10972.71
-      },
-      {
-        'period': 4,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'FEES',
-        'value': 11082.43
-      },
-      {
-        'period': 5,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'FEES',
-        'value': 11193.26
-      },
-      {
-        'period': 0,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'ESTIMATED_OOP_COST',
-        'value': 0
-      },
-      {
-        'period': 1,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'ESTIMATED_OOP_COST',
-        'value': 337435.18
-      },
-      {
-        'period': 2,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'ESTIMATED_OOP_COST',
-        'value': 360819.48
-      },
-      {
-        'period': 3,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'ESTIMATED_OOP_COST',
-        'value': 382766.13
-      },
-      {
-        'period': 4,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'ESTIMATED_OOP_COST',
-        'value': 406887.11
-      },
-      {
-        'period': 5,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'ESTIMATED_OOP_COST',
-        'value': 439969.13
-      },
-      {
-        'period': 0,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'FUNDING_GAP',
-        'value': 0
-      },
-      {
-        'period': 1,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'FUNDING_GAP',
-        'value': 425957.4
-      },
-      {
-        'period': 2,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'FUNDING_GAP',
-        'value': 557848.01
-      },
-      {
-        'period': 3,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'FUNDING_GAP',
-        'value': 700656.85
-      },
-      {
-        'period': 4,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'FUNDING_GAP',
-        'value': 855127.89
-      },
-      {
-        'period': 5,
-        'planId': 2,
-        'currentModified': 'Modified',
-        'category': 'FUNDING_GAP',
-        'value': 1022052.5
-      }
-    ];
-
     this.projectionData = new ProjectionData(this.jsonData, this.categories);
     this.graphData = this.projectionData.getGraphkData();
-
-
-    // apply some filters
-    // this.projectionData.processGraphData(this.jsonData, this.categories, undefined, [1, 2, 3], ['Modified']);
-    // this.graphData = this.projectionData.getGraphkData();
-
-
-    this.createChart();
-
-    this.initialChart2();
-
 
   }
 
   createChart() {
+
+    this.categories = ['EMPLOYER_PREMIUM', 'FUNDING_GAP', 'MEMBER_PREMIUM', 'TAX', 'FEES'];
+    this.projectionData = new ProjectionData(this.jsonData, this.categories);
+    this.graphData = this.projectionData.getGraphkData();
+
     const element = this.chartContainer.nativeElement;
     this.width = element.offsetWidth - this.margin.left - this.margin.right;
     this.height = element.offsetHeight - this.margin.top - this.margin.bottom;
@@ -1471,10 +172,14 @@ export class ProjectionChartComponent implements OnInit {
       .call(yaxis);
   }
 
+
+
+
+
   initialChart() {
 
 
-    this.projectionData.processGraphData(this.jsonData, this.categories, [1], [1, 2, 3], undefined);
+    this.projectionData.processGraphData(this.jsonData, this.categories, undefined, undefined, undefined);
     this.graphData = this.projectionData.getGraphkData();
 
 
@@ -1498,71 +203,7 @@ export class ProjectionChartComponent implements OnInit {
       .tickFormat(d3.format('.2s'));
 
 
-    this.xAxis.transition().call(xaxis);
-    this.yAxis.transition().call(yaxis);
 
-
-
-    // charting
-    const project_stackedbar = this.chart.selectAll('.group')
-      .data(this.graphData);
-
-    project_stackedbar.exit().remove();
-
-    const inner = project_stackedbar
-      .enter().append('g')
-      .attr('class', 'group')
-      .attr('transform', d => 'translate(' + this.x0Scale(d['period']) + ',0)');
-
-
-    const update = inner.selectAll('.bar')
-      .data((d) => d['stackNumber']);
-
-
-    update.enter().append('rect')
-      .classed('bar', true)
-      .attr('width', d => d['display'] === 0 ? this.x1Scale.bandwidth() * 2 : this.x1Scale.bandwidth())
-      .attr('x', d => this.x1Scale(d['column']))
-      .attr('y', d => this.yScale(0))
-      .attr('height', 0)
-      .style('fill', d => this.colors(d['name']))
-      .style('opacity', 0.8)
-      .transition()
-      .delay((d, i) => {
-        const abc = (d['column'] === 'Current' ? 0 : 1);
-        return d['period'] * 50 + abc * 25;
-      })
-      .attr('y', d => this.yScale(d['yEnd']))
-      .attr('height', d => this.yScale(d['yBegin']) - this.yScale(d['yEnd']));
-  }
-
-
-
-  initialChart2() {
-
-
-    this.projectionData.processGraphData(this.jsonData, this.categories, undefined, [0, 1, 2, 3, 4, 5], undefined);
-    this.graphData = this.projectionData.getGraphkData();
-
-
-
-    this.x0Scale.domain(this.projectionData.getGraphPeriod().map(String));
-    this.yScale.domain([0, d3.max(this.projectionData.getGraphkData(), (d) => d['total'])]);
-
-
-    this.x1Scale
-      .domain(this.projectionData.getGraphCurrentModified())
-      .range([0, this.x0Scale.bandwidth()]);
-
-
-    // x & y axis
-    const xaxis = d3.axisBottom(this.x0Scale)
-      .tickSizeOuter(0)
-      .tickFormat((d) => d === '0' ? 'Current Policy' : 'period ' + d);
-
-    const yaxis = d3.axisLeft(this.yScale)
-      .tickSizeOuter(0)
-      .tickFormat(d3.format('.2s'));
 
 
     this.xAxis.transition().call(xaxis);
@@ -1575,16 +216,22 @@ export class ProjectionChartComponent implements OnInit {
       .data(this.graphData)
       .enter().append('g')
       .attr('class', 'group')
-      .attr('transform', d => 'translate(' + this.x0Scale(d['period']) + ',0)')
+      .attr('transform', d => 'translate(' + this.x0Scale(d['period']) + ',0)');
+
+
+    const rect = project_stackedbar
       .selectAll('rect')
-      .data(function (d) { return d['stackNumber']; })
+      .data(d => d['stackNumber'])
       .enter().append('rect')
+      .classed('bar', true)
       .attr('width', d => d['display'] === 0 ? this.x1Scale.bandwidth() * 2 : this.x1Scale.bandwidth())
       .attr('x', d => this.x1Scale(d['column']))
       .attr('y', d => this.yScale(0))
       .attr('height', 0)
       .style('fill', d => this.colors(d['name']))
-      .style('opacity', 0.8)
+      .style('stroke', d => this.colors(d['name']))
+
+      .style('fill-opacity', 0.7)
       .transition()
       .delay((d, i) => {
         const abc = (d['column'] === 'Current' ? 0 : 1);
@@ -1593,20 +240,27 @@ export class ProjectionChartComponent implements OnInit {
       .attr('y', d => this.yScale(d['yEnd']))
       .attr('height', d => this.yScale(d['yBegin']) - this.yScale(d['yEnd']));
 
-
-
-
+    rect.each(function (d) {
+      this.classList.add(d['column']);
+    });
 
   }
 
 
 
-  updateChart2() {
+  updateChart2(jsonData: Array<any>, categories: Array<string>,
+    plans?: Array<number>, periods?: Array<number>, currentModified?: Array<string>) {
 
-    const cm = ['Current'];
+    const cm = ['Modified', 'Current'];
 
     // update data
-    this.projectionData.processGraphData(this.jsonData, this.categories, [1, 2], [0, 4, 5], undefined);
+    // this.projectionData.processGraphData(this.jsonData, this.categories, [1], [0, 1, 2, 5], undefined);
+    // this.projectionData.processGraphData(this.jsonData, this.categories, undefined, undefined, undefined);
+
+
+    this.projectionData.processGraphData(jsonData, categories, plans, periods, currentModified);
+
+
     this.graphData = this.projectionData.getGraphkData();
     // update scale
     this.x0Scale.domain(this.projectionData.getGraphPeriod().map(String));
@@ -1629,65 +283,75 @@ export class ProjectionChartComponent implements OnInit {
     this.yAxis.transition().call(yaxis);
 
 
+
     // update chart
-
-
-
     const update = this.chart.selectAll('.group')
       .data(this.graphData);
 
-
     update.exit().remove();
 
-    console.log(update);
-
-    console.log(this.x1Scale.bandwidth());
 
     // change existing group
-    this.chart.selectAll('.group') // .transition()
-      .attr('transform', d => 'translate(' + this.x0Scale(d['period']) + ',0)')
-      .selectAll('rect')
-      .data(function (d) { return d['stackNumber']; })
-      // .enter().append('rect')
+    const abc = this.chart.selectAll('.group') // .transition()
+      .attr('transform', d => 'translate(' + this.x0Scale(d['period']) + ',0)');
+
+
+    // if current modified is selected
+    // abc.selectAll('.bar.Current').remove();
+
+    const barUpdate = abc.selectAll('.bar')
+      .data(function (d) {
+        console.log(d);
+        return d['stackNumber'];
+      });
+
+
+    barUpdate.exit().remove();
+
+    barUpdate
+
       .transition()
-      .attr('width', d => d['display'] === 0 ? this.x1Scale.bandwidth() * 2 : this.x1Scale.bandwidth())
+      .attr('width', d => (d['display'] === 0 && cm.length !== 1) ? this.x1Scale.bandwidth() * 2 : this.x1Scale.bandwidth())
       .attr('x', d => this.x1Scale(d['column']))
       .attr('y', d => this.yScale(d['yEnd']))
       .attr('height', d => this.yScale(d['yBegin']) - this.yScale(d['yEnd']));
 
 
-    console.log(update);
-
-
-
-    console.log('change?');
+    // console.log(update);
 
 
     // apppend new group
-    update
+    const barAdd = update
       .enter().append('g')
       .attr('class', 'group')
-      .attr('transform', d => 'translate(' + this.x0Scale(d['period']) + ',0)')
+      .attr('transform', d => 'translate(' + this.x0Scale(d['period']) + ',0)');
+
+
+    const rect = barAdd
       .selectAll('rect')
       .data(function (d) { return d['stackNumber']; })
       .enter().append('rect')
+      .classed('bar', true)
       .transition()
-      .attr('width', function (d) {
-        console.log(cm.length);
-        return d['display'] === 0 ? this.x1Scale.bandwidth() * 2 : this.x1Scale.bandwidth();
-      })
+      .attr('width', d => (d['display'] === 0 && cm.length !== 1) ? this.x1Scale.bandwidth() * 2 : this.x1Scale.bandwidth())
       .attr('x', d => this.x1Scale(d['column']))
       .attr('y', d => this.yScale(d['yEnd']))
       .attr('height', d => this.yScale(d['yBegin']) - this.yScale(d['yEnd']))
       .style('fill', d => this.colors(d['name']))
-      .style('opacity', 0.8);
+      .style('stroke', d => this.colors(d['name']))
 
-    console.log(update);
+      .style('fill-opacity', 0.7);
 
+
+    rect.each(function (d) {
+      this.classList.add(d['column']);
+    });
 
 
   }
 
+
+  // to be deleted
   updateChart() {
 
     // update data
@@ -1782,7 +446,9 @@ export class ProjectionChartComponent implements OnInit {
       .attr('y', d => this.yScale(0))
       .attr('height', 0)
       .style('fill', d => this.colors(d['name']))
-      .style('opacity', 0.8)
+      .style('stroke', d => this.colors(d['name']))
+
+      .style('fill-opacity', 0.7)
       .transition()
       .delay((d, i) => {
         console.log(d);
