@@ -1,11 +1,8 @@
-<div class="container-fluid">
+<div class="container">
+    <h1>D3 Crossfilter</h1>
+    <!-- <div (click)="changeData(1)">json1</div>
+    <div (click)="changeData(2)">json2</div> -->
 
-    <div (click)="changeData(1)">json1</div>
-    <div (click)="changeData(2)">json2</div>
-    <div class="row">
+    <app-projection-chart *ngIf="json" [jsonData]="json"></app-projection-chart>
 
-        <div class="col">
-            <app-projection-chart *ngIf="json" [jsonData]="json"></app-projection-chart>
-        </div>
-    </div>
 </div>
