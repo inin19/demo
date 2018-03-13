@@ -3,11 +3,12 @@ import { NgModule } from '@angular/core';
 
 
 import { AppComponent } from './app.component';
-
+import { ProjectionChartComponent } from './share/projection-chart/projection-chart.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    ProjectionChartComponent
   ],
   imports: [
     BrowserModule
