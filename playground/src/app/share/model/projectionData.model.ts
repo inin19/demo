@@ -77,45 +77,6 @@ export class ProjectionData {
         if (currentmodified) {
             this.currentModifiedDimension.filter((d) => currentmodified.indexOf(d) !== -1);
         }
-
-
-        // recreate dimension
-
-        this.otherDimension.dispose();
-        this.otherDimensionGroup = this.otherDimension.group();
-
-        this.otherDimensionGroup.all().forEach(function (d) {
-            // parse the json string created above
-            d.key = JSON.parse(d.key);
-            // filtered indicator, 0 means filtered out
-            d.extra = d.value;
-        });
-
-
-
-        // this.otherDimensionGroup.all().forEach(function (d) {
-        //     // parse the json string created above
-        //    // d.key = JSON.parse(d.key);
-        //     // filtered indicator, 0 means filtered out
-        //      d.extra = d.value;
-
-        //     console.log(d.value);
-        // });
-
-
-        // console.log('-------------------------------------------------------------');
-
-        // for (const i of this.otherDimensionGroup.all()) {
-        //     console.log(i);
-        // }
-
-
-
-
-
-
-
-
         // Prepform Group by and fitler out the groups that does not apply
         this.data_filteredByPlan = this.otherDimensionGroup.reduceSum(function (d) { return d.value; }).all();
 
@@ -130,11 +91,6 @@ export class ProjectionData {
         this.data_filteredByPlanReduced = this.data_filteredByPlan.filter((d) => (d.value !== -999));
 
 
-
-        // console.log('DDDDDBUG');
-        // for (const i of this.data_filteredByPlanReduced) {
-        //     console.log(i);
-        // }
 
         // ? better way  get period number
         if (periods) {
@@ -251,16 +207,21 @@ export class ProjectionData {
     }
 
 
+    // let UI handle list of data
+
     getGraphPeriod(): Array<number> {
+        console.log('graphPeriod used');
         return this.graphPeriod;
     }
 
     getGraphCurrentModified(): Array<string> {
+        console.log('Current Modified used');
         return this.graphCurrentModified;
     }
 
 
     getGraphPlan(): Array<number> {
+        console.log('graph plans used');
         return this.graphPlan;
     }
 
