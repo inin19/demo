@@ -70,14 +70,71 @@ export class ProjectionData {
         }
         if (periods) {
             this.periodDimension.filter((d) => periods.indexOf(d) !== -1);
+        } else {
+            // console.log(periods);
+            // this.periodDimension.filterAll();
         }
         if (currentmodified) {
             this.currentModifiedDimension.filter((d) => currentmodified.indexOf(d) !== -1);
         }
 
+
+        // recreate dimension
+
+        this.otherDimension.dispose();
+        this.otherDimensionGroup = this.otherDimension.group();
+
+        this.otherDimensionGroup.all().forEach(function (d) {
+            // parse the json string created above
+            d.key = JSON.parse(d.key);
+            // filtered indicator, 0 means filtered out
+            d.extra = d.value;
+        });
+
+
+
+        // this.otherDimensionGroup.all().forEach(function (d) {
+        //     // parse the json string created above
+        //    // d.key = JSON.parse(d.key);
+        //     // filtered indicator, 0 means filtered out
+        //      d.extra = d.value;
+
+        //     console.log(d.value);
+        // });
+
+
+        // console.log('-------------------------------------------------------------');
+
+        // for (const i of this.otherDimensionGroup.all()) {
+        //     console.log(i);
+        // }
+
+
+
+
+
+
+
+
         // Prepform Group by and fitler out the groups that does not apply
         this.data_filteredByPlan = this.otherDimensionGroup.reduceSum(function (d) { return d.value; }).all();
-        this.data_filteredByPlanReduced = this.data_filteredByPlan.filter((d) => (d.extra !== 0));
+
+
+
+
+
+
+        // this.data_filteredByPlanReduced = this.data_filteredByPlan.filter((d) => (d.extra !== 0));
+
+
+        this.data_filteredByPlanReduced = this.data_filteredByPlan.filter((d) => (d.value !== -999));
+
+
+
+        // console.log('DDDDDBUG');
+        // for (const i of this.data_filteredByPlanReduced) {
+        //     console.log(i);
+        // }
 
         // ? better way  get period number
         if (periods) {
