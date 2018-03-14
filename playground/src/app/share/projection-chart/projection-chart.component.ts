@@ -35,20 +35,23 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
   // related to selectors
 
-  selectedPlanAll: any;
-  plansSelector: Array<any>;
+  public selectedPlanAll: any;
+  public selectedPeriodAll: any;
+  public selectedCurrentModifiedAll: any;
 
-  selectedPeriodAll: any;
-  periodSelector: Array<any>;
-
+  public plansSelector: Array<any>;
+  public periodSelector: Array<any>;
+  public currentModifiedSelector: Array<any>;
 
   // arrays for selectors
 
-  private selectedPlans: Array<number>;
-  private selectedPeriods: Array<number>;
+  selectedPlans: Array<number>;
+  selectedPeriods: Array<number>;
+  selectedCurrentModified: Array<string>;
 
 
-  constructor() { }
+  constructor() {
+  }
 
 
   ngOnChanges() {
@@ -59,9 +62,9 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
       // console.log('data changes');
       // console.log(this.jsonData);
 
-      this.createChartData();
+      this.ReCreateChartData();
 
-      this.updateChart2(this.jsonData, this.categories, undefined, undefined, undefined);
+      this.updateChart(this.jsonData, this.categories, undefined, undefined, undefined);
 
       this.createSelector();
     }
@@ -69,45 +72,70 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
-    this.createChartData();
     this.createChart();
     this.initialChart();
-
     this.createSelector();
+
   }
 
 
   createSelector() {
 
+
+    // Initial Plan Selectors
     this.plansSelector = new Array();
     this.selectedPlanAll = true;
-
     this.selectedPlans = new Array();
-    this.selectedPeriods = new Array();
 
-    this.periodSelector = new Array();
-    this.selectedPeriodAll = true;
-
-    for (const i of this.projectionData.getGraphPlan()) {
+    for (const i of this.projectionData.getPlans()) {
       this.plansSelector.push({ plan: i, selected: true });
       this.selectedPlans.push(i);
     }
 
-    for (const i of this.projectionData.getGraphPeriod()) {
+
+
+    // Initial Period Selectors
+    this.periodSelector = new Array();
+    this.selectedPeriodAll = true;
+    this.selectedPeriods = new Array();
+
+    for (const i of this.projectionData.getPeriods()) {
       this.periodSelector.push({ period: i, selected: true });
       this.selectedPeriods.push(i);
     }
 
-    console.log('populate plans: ' + this.selectedPlans);
-    console.log('populate period:' + this.selectedPeriods);
+
+
+
+    // Initial CurrentModified Selectors
+    this.currentModifiedSelector = new Array();
+    this.selectedCurrentModifiedAll = true;
+    this.selectedCurrentModified = new Array();
+
+    for (const i of this.projectionData.getCurrentModified()) {
+      this.currentModifiedSelector.push({ currentModified: i, selected: true });
+      this.selectedCurrentModified.push(i);
+    }
+
+
+    console.log(this.periodSelector);
+
+
+    // console.log('populate plans: ' + this.selectedPlans);
+    // console.log('populate period:' + this.selectedPeriods);
+    // console.log('populate Current/Modified:' + this.selectedCurrentModified);
 
   }
 
   selectPlanAll() {
 
     this.selectedPlans = [];
-    for (let i = 0; i < this.plansSelector.length; i++) {
-      this.plansSelector[i].selected = this.selectedPlanAll;
+    // for (let i = 0; i < this.plansSelector.length; i++) {
+    //   this.plansSelector[i].selected = this.selectedPlanAll;
+    // }
+
+    for (const i of this.plansSelector) {
+      i.selected = this.selectedPlanAll;
     }
 
     if (this.selectedPlanAll) {
@@ -116,37 +144,58 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
       }
     }
 
-
     console.log('populate plans: ' + this.selectedPlans);
     console.log('populate period:' + this.selectedPeriods);
-
-    this.updateChart2(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, undefined);
+    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, undefined);
 
   }
 
 
   selectPeriodAll() {
-
-
     this.selectedPeriods = [];
+    // for (let i = 0; i < this.periodSelector.length; i++) {
+    //   this.periodSelector[i].selected = this.selectedPeriodAll;
+    // }
 
-    for (let i = 0; i < this.periodSelector.length; i++) {
-      this.periodSelector[i].selected = this.selectedPeriodAll;
+    for (const i of this.periodSelector) {
+      i.selected = this.selectedPeriodAll;
     }
-
 
     if (this.selectedPeriodAll) {
       for (const i of this.periodSelector) {
         this.selectedPeriods.push(i.period);
       }
     }
-
     console.log('populate plans: ' + this.selectedPlans);
     console.log('populate period:' + this.selectedPeriods);
+    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, undefined);
+  }
 
-    this.updateChart2(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, undefined);
+  selectCurrentModifiedAll() {
+    this.selectedCurrentModified = [];
+    // for (let i = 0; i < this.currentModifiedSelector.length; i++) {
+    //   this.currentModifiedSelector[i].selected = this.selectedCurrentModifiedAll;
+    // }
+
+    for (const i of this.currentModifiedSelector) {
+      i.selected = this.selectedCurrentModifiedAll;
+    }
+
+
+    if (this.selectedCurrentModifiedAll) {
+      for (const i of this.currentModifiedSelector) {
+        this.selectedCurrentModified.push(i.currentModified);
+      }
+    }
+    console.log('populate plans: ' + this.selectedPlans);
+    console.log('populate period:' + this.selectedPeriods);
+    console.log('populate current/modfied:' + this.selectedCurrentModified);
 
   }
+
+
+
+
 
   checkIfAllPlanSelected() {
     this.selectedPlanAll = this.plansSelector.every(function (item: any) {
@@ -161,10 +210,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
       }
     }
 
-    this.updateChart2(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, undefined);
-
-    console.log('populate plans: ' + this.selectedPlans);
-    console.log('populate period:' + this.selectedPeriods);
+    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, undefined);
 
   }
 
@@ -181,50 +227,38 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
         this.selectedPeriods.push(i.period);
       }
     }
+    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, undefined);
+  }
+
+  checkIfAllCurrentModifiedSelected() {
+    this.selectedCurrentModifiedAll = this.currentModifiedSelector.every(function (item: any) {
+      return item.selected === true;
+    });
+
+    this.selectedCurrentModified = [];
+
+    for (const i of this.currentModifiedSelector) {
+      if (i.selected) {
+        this.selectedCurrentModified.push(i.period);
+      }
+    }
+
 
     console.log('populate plans: ' + this.selectedPlans);
     console.log('populate period:' + this.selectedPeriods);
-
-    this.updateChart2(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, undefined);
-
-  }
-
-
-
-  createSelector2() {
-
-    // VERY IMPORTANT Capture class instance
-    const _this = this;
-
-    // const selector = d3.select('#selector').selectAll('button')
-    //   .data(this.projectionData.getGraphPeriod())
-    //   .enter()
-    //   .append('button')
-    //   .classed('priodButton', true)
-    //   .text((d) => d === 0 ? 'Current Policy' : 'period ' + d)
-    //   .on('click', function (d) {
-    //     console.log(d);
-    //     // console.log(_this);
-
-    //     _this.updateChart2(_this.jsonData, _this.categories, undefined, [1], undefined);
-
-    //   });
+    console.log('populate current/modfied:' + this.selectedCurrentModified);
 
   }
 
 
-  createChartData() {
-    this.categories = ['EMPLOYER_PREMIUM', 'FUNDING_GAP', 'MEMBER_PREMIUM', 'TAX', 'FEES'];
-    this.projectionData = new ProjectionData(this.jsonData, this.categories);
-    this.graphData = this.projectionData.getGraphkData();
 
-  }
+
 
   createChart() {
 
     this.categories = ['EMPLOYER_PREMIUM', 'FUNDING_GAP', 'MEMBER_PREMIUM', 'TAX', 'FEES'];
     this.projectionData = new ProjectionData(this.jsonData, this.categories);
-    this.graphData = this.projectionData.getGraphkData();
+    this.graphData = this.projectionData.getGraphData();
 
     const element = this.chartContainer.nativeElement;
     this.width = element.offsetWidth - this.margin.left - this.margin.right;
@@ -248,7 +282,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
     const innercColumns = {};
 
-    for (const item of this.projectionData.getGraphCurrentModified()) {
+    for (const item of this.projectionData.getCurrentModified()) {
       innercColumns[item] = this.categories;
     }
 
@@ -256,10 +290,10 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
     // define X & Y domains
     //    const xDomain = this.projectionData.getGraphPeriod();
-    //    const yDomain = [0, d3.max(this.projectionData.getGraphkData(), (d) => d['total'])];
+    //    const yDomain = [0, d3.max(this.projectionData.getGraphData(), (d) => d['total'])];
 
     // create scales
-    this.x0Scale = d3.scaleBand().domain(this.projectionData.getGraphPeriod().map(String))
+    this.x0Scale = d3.scaleBand().domain(this.projectionData.getPeriods().map(String))
       .rangeRound([0, this.width])
       .padding(0.2);
 
@@ -268,7 +302,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
       .paddingInner(0.1);
 
     this.yScale = d3.scaleLinear()
-      .domain([0, d3.max(this.projectionData.getGraphkData(), (d) => d['total'])])
+      .domain([0, d3.max(this.projectionData.getGraphData(), (d) => d['total'])])
       .range([this.height, 0]);
 
     // bar colors
@@ -305,16 +339,16 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
 
     this.projectionData.processGraphData(this.jsonData, this.categories, undefined, undefined, undefined);
-    this.graphData = this.projectionData.getGraphkData();
+    this.graphData = this.projectionData.getGraphData();
 
 
 
-    this.x0Scale.domain(this.projectionData.getGraphPeriod().map(String));
-    this.yScale.domain([0, d3.max(this.projectionData.getGraphkData(), (d) => d['total'])]);
+    this.x0Scale.domain(this.projectionData.getPeriods().map(String));
+    this.yScale.domain([0, d3.max(this.projectionData.getGraphData(), (d) => d['total'])]);
 
 
     this.x1Scale
-      .domain(this.projectionData.getGraphCurrentModified())
+      .domain(this.projectionData.getCurrentModified())
       .range([0, this.x0Scale.bandwidth()]);
 
 
@@ -373,7 +407,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
 
 
-  updateChart2(jsonData: Array<any>, categories: Array<string>,
+  updateChart(jsonData: Array<any>, categories: Array<string>,
     plans?: Array<number>, periods?: Array<number>, currentModified?: Array<string>) {
 
     const cm = ['Modified', 'Current'];
@@ -385,7 +419,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
     this.projectionData.processGraphData(jsonData, categories, plans, periods, currentModified);
 
-    this.graphData = this.projectionData.getGraphkData();
+    this.graphData = this.projectionData.getGraphData();
 
     for (const i of this.graphData) {
       console.log(i);
@@ -394,9 +428,9 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
 
     // update scale
-    this.x0Scale.domain(this.projectionData.getGraphPeriod().map(String));
-    this.yScale.domain([0, d3.max(this.projectionData.getGraphkData(), (d) => d['total'])]);
-    this.x1Scale.domain(this.projectionData.getGraphCurrentModified())
+    this.x0Scale.domain(this.projectionData.getPeriods().map(String));
+    this.yScale.domain([0, d3.max(this.projectionData.getGraphData(), (d) => d['total'])]);
+    this.x1Scale.domain(this.projectionData.getCurrentModified())
       .range([0, this.x0Scale.bandwidth()]);
 
 
@@ -482,12 +516,20 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
   }
 
 
-  // to be deleted
-  updateChart() {
+  ReCreateChartData() {
+    this.projectionData = new ProjectionData(this.jsonData, this.categories);
+    this.graphData = this.projectionData.getGraphData();
+
+  }
+
+
+
+  // ------------------------------------------------------------------------------- to be deleted
+  updateChart_delete() {
 
     // update data
     this.projectionData.processGraphData(this.jsonData, this.categories, [1], [1, 2, 3, 4], undefined);
-    this.graphData = this.projectionData.getGraphkData();
+    this.graphData = this.projectionData.getGraphData();
 
     // for (const i of this.graphData) {
     //   console.log(i);
@@ -495,9 +537,9 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
 
     // update scale
-    this.x0Scale.domain(this.projectionData.getGraphPeriod().map(String));
-    this.yScale.domain([0, d3.max(this.projectionData.getGraphkData(), (d) => d['total'])]);
-    this.x1Scale.domain(this.projectionData.getGraphCurrentModified())
+    this.x0Scale.domain(this.projectionData.getPeriods().map(String));
+    this.yScale.domain([0, d3.max(this.projectionData.getGraphData(), (d) => d['total'])]);
+    this.x1Scale.domain(this.projectionData.getCurrentModified())
       .range([0, this.x0Scale.bandwidth()]);
 
 
@@ -593,4 +635,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
 
   }
+
+
+
 }

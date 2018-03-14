@@ -5,24 +5,45 @@
 
     <div id='selector' class="col-3">
 
+         <!-- ----------------test IE -->
+        <!-- <ul>
+            <li>
+                <input type="checkbox" [(ngModel)]="selectedPlanAll" /> (All Plans)
+            </li>
+
+        </ul> -->
+
+
+
 
         <ul>
             <li>
-                <input type="checkbox" [(ngModel)]="selectedPlanAll" (change)="selectPlanAll();" /> (All Plans)
+                <input type="checkbox" [(ngModel)]="selectedPlanAll" (change)="selectPlanAll()" /> (All Plans)
             </li>
             <li *ngFor="let n of plansSelector">
-                <input type="checkbox" [(ngModel)]="n.selected" (change)="checkIfAllPlanSelected();"> {{n.plan}}
+                <input type="checkbox" [(ngModel)]="n.selected" (change)="checkIfAllPlanSelected()"> {{n.plan}}
             </li>
         </ul>
 
 
+        <ul>
+            <li>
+                <input type="checkbox" [(ngModel)]="selectedPeriodAll" (change)="selectPeriodAll()" /> (All Periods)
+            </li>
+            <li *ngFor="let n of periodSelector">
+                <input type="checkbox" [(ngModel)]="n.selected" (change)="checkIfAllPeriodSelected()"> {{n.period}}
+            </li>
+        </ul>
+
+
+        <!-- current/modified -->
 
         <ul>
             <li>
-                <input type="checkbox" [(ngModel)]="selectedPeriodAll" (change)="selectPeriodAll();" /> (All Periods)
+                <input type="checkbox" [(ngModel)]="selectedCurrentModifiedAll" (change)="selectCurrentModifiedAll()" /> (All)
             </li>
-            <li *ngFor="let n of periodSelector">
-                <input type="checkbox" [(ngModel)]="n.selected" (change)="checkIfAllPeriodSelected();"> {{n.period}}
+            <li *ngFor="let n of currentModifiedSelector">
+                <input type="checkbox" [(ngModel)]="n.selected" (change)="checkIfAllCurrentModifiedSelected()"> {{n.currentModified}}
             </li>
         </ul>
 

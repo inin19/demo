@@ -202,26 +202,26 @@ export class ProjectionData {
         }
     }
 
-    getGraphkData(): Array<any> {
+    getGraphData(): Array<any> {
         return this.graphData;
     }
 
 
-    // let UI handle list of data
+    // only used to populate seletors
 
-    getGraphPeriod(): Array<number> {
-        console.log('graphPeriod used');
+    getPeriods(): Array<number> {
+        // console.log('graphPeriod used');
         return this.graphPeriod;
     }
 
-    getGraphCurrentModified(): Array<string> {
-        console.log('Current Modified used');
+    getCurrentModified(): Array<string> {
+        // console.log('Current Modified used');
         return this.graphCurrentModified;
     }
 
 
-    getGraphPlan(): Array<number> {
-        console.log('graph plans used');
+    getPlans(): Array<number> {
+        // console.log('graph plans used');
         return this.graphPlan;
     }
 
