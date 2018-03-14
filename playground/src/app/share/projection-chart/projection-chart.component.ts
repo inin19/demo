@@ -33,6 +33,14 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
   // private svg: any;
 
 
+  // related to selectors
+
+  selectedPlanAll: any;
+  plansSelector: Array<any>;
+
+  selectedPeriodAll: any;
+  periodSelector: Array<any>;
+
   constructor() { }
 
 
@@ -46,11 +54,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
       this.createChartData();
 
-
       this.updateChart2(this.jsonData, this.categories, undefined, undefined, undefined);
-
-
-
 
     }
 
@@ -62,28 +66,93 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
     this.initialChart();
 
     this.createSelector();
-
   }
 
 
   createSelector() {
 
+    this.plansSelector = new Array();
+    this.selectedPlanAll = true;
+
+    this.periodSelector = new Array();
+    this.selectedPeriodAll = true;
+
+    for (const i of this.projectionData.getGraphPlan()) {
+      this.plansSelector.push({ plan: i, selected: true });
+    }
+
+    for (const i of this.projectionData.getGraphPeriod()) {
+      this.periodSelector.push({ period: i, selected: true });
+    }
+
+
+  }
+
+  selectPlanAll() {
+    for (let i = 0; i < this.plansSelector.length; i++) {
+      this.plansSelector[i].selected = this.selectedPlanAll;
+    }
+
+    for (const i of this.plansSelector) {
+      console.log(i);
+    }
+
+  }
+
+
+  selectPeriodAll() {
+    for (let i = 0; i < this.periodSelector.length; i++) {
+      this.periodSelector[i].selected = this.selectedPeriodAll;
+    }
+
+    for (const i of this.periodSelector) {
+      console.log(i);
+    }
+  }
+
+  checkIfAllPlanSelected() {
+    this.selectedPlanAll = this.plansSelector.every(function (item: any) {
+      return item.selected === true;
+    });
+
+
+    for (const i of this.plansSelector) {
+      console.log(i);
+    }
+  }
+
+
+  checkIfAllPeriodSelected() {
+    this.selectedPeriodAll = this.periodSelector.every(function (item: any) {
+      return item.selected === true;
+    });
+
+
+    for (const i of this.periodSelector) {
+      console.log(i);
+    }
+  }
+
+
+
+  createSelector2() {
+
     // VERY IMPORTANT Capture class instance
     const _this = this;
 
-    const selector = d3.select('#selector').selectAll('button')
-      .data(this.projectionData.getGraphPeriod())
-      .enter()
-      .append('button')
-      .classed('priodButton', true)
-      .text((d) => d === 0 ? 'Current Policy' : 'period ' + d)
-      .on('click', function (d) {
-        console.log(d);
-        // console.log(_this);
+    // const selector = d3.select('#selector').selectAll('button')
+    //   .data(this.projectionData.getGraphPeriod())
+    //   .enter()
+    //   .append('button')
+    //   .classed('priodButton', true)
+    //   .text((d) => d === 0 ? 'Current Policy' : 'period ' + d)
+    //   .on('click', function (d) {
+    //     console.log(d);
+    //     // console.log(_this);
 
-        _this.updateChart2(_this.jsonData, _this.categories, undefined, [1], undefined);
+    //     _this.updateChart2(_this.jsonData, _this.categories, undefined, [1], undefined);
 
-      });
+    //   });
 
   }
 

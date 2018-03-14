@@ -3,10 +3,35 @@
 
 <div class="row">
 
-    <div id='selector' class="col" ></div>
-  
+    <div id='selector' class="col-3">
 
-    <div id='chart' #chart class="col" ></div>
+
+        <ul>
+            <li>
+                <input type="checkbox" [(ngModel)]="selectedPlanAll" (change)="selectPlanAll();" /> (All Plans)
+            </li>
+            <li *ngFor="let n of plansSelector">
+                <input type="checkbox" [(ngModel)]="n.selected" (change)="checkIfAllPlanSelected();"> {{n.plan}}
+            </li>
+        </ul>
+
+
+
+        <ul>
+            <li>
+                <input type="checkbox" [(ngModel)]="selectedPeriodAll" (change)="selectPeriodAll();" /> (All Periods)
+            </li>
+            <li *ngFor="let n of periodSelector">
+                <input type="checkbox" [(ngModel)]="n.selected" (change)="checkIfAllPeriodSelected();"> {{n.period}}
+            </li>
+        </ul>
+
+
+
+
+    </div>
+
+
+    <div id='chart' #chart class="col-9"></div>
 
 </div>
-
