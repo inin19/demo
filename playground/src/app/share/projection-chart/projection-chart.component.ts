@@ -65,7 +65,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
       this.ReCreateChartData();
 
       this.updateChart(this.jsonData, this.categories, this.projectionData.getPlans(), this.projectionData.getPeriods(),
-       this.projectionData.getCurrentModified());
+        this.projectionData.getCurrentModified());
 
       this.createSelector();
 
@@ -150,7 +150,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
     console.log('populate period:' + this.selectedPeriods);
     console.log('populate current/modfied:' + this.selectedCurrentModified);
 
-    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, undefined);
+    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, this.selectedCurrentModified);
 
   }
 
@@ -294,6 +294,8 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
     for (const item of this.projectionData.getCurrentModified()) {
       innercColumns[item] = this.categories;
     }
+
+    console.log(innercColumns);
 
     // create scales
     this.x0Scale = d3.scaleBand().domain(this.projectionData.getPeriods().map(String))
@@ -467,15 +469,17 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
     // if current modified is selected
     // abc.selectAll('.bar.Current').remove();
 
-    // if (currentModified.length === 1) {
 
-    // }
 
     const barUpdate = abc.selectAll('.bar')
       .data(function (d) {
-        console.log(d['stackNumber']);
+        //        console.log(d['stackNumber']);
         return d['stackNumber'];
       });
+
+    // for (const i of this.graphData) {
+    //   console.log(i);
+    // }
 
     console.log(barUpdate);
 
@@ -487,10 +491,21 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
       .attr('width', d => (d['display'] === 0 && currentModified.length !== 1) ? this.x1Scale.bandwidth() * 2 : this.x1Scale.bandwidth())
       .attr('x', d => this.x1Scale(d['column']))
       .attr('y', d => this.yScale(d['yEnd']))
-      .attr('height', d => this.yScale(d['yBegin']) - this.yScale(d['yEnd']));
+      .attr('height', d => this.yScale(d['yBegin']) - this.yScale(d['yEnd']))
+      .style('fill', d => this.colors(d['name']))
+      .style('stroke', d => this.colors(d['name']))
+      .attr('classed', true);
 
 
-    // console.log(update);
+
+
+    barUpdate.each(function (d) {
+      this.classList.add(d['column']);
+    });
+
+
+
+    // console.log(barUpdate);
 
 
     // apppend new group
@@ -502,7 +517,11 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
     const rect = barAdd
       .selectAll('rect')
-      .data(function (d) { return d['stackNumber']; })
+      .data(function (d) {
+
+        console.log('adding + ' + d['stackNumber']);
+        return d['stackNumber'];
+      })
       .enter().append('rect')
       .classed('bar', true)
       .transition()
@@ -512,7 +531,6 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
       .attr('height', d => this.yScale(d['yBegin']) - this.yScale(d['yEnd']))
       .style('fill', d => this.colors(d['name']))
       .style('stroke', d => this.colors(d['name']))
-
       .style('fill-opacity', 0.7);
 
 
