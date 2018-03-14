@@ -67,6 +67,8 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
       this.updateChart(this.jsonData, this.categories, undefined, undefined, undefined);
 
       this.createSelector();
+
+
     }
 
   }
@@ -118,7 +120,6 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
     }
 
 
-    console.log(this.periodSelector);
 
 
     // console.log('populate plans: ' + this.selectedPlans);
@@ -146,6 +147,8 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
     console.log('populate plans: ' + this.selectedPlans);
     console.log('populate period:' + this.selectedPeriods);
+    console.log('populate current/modfied:' + this.selectedCurrentModified);
+
     this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, undefined);
 
   }
@@ -168,7 +171,9 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
     }
     console.log('populate plans: ' + this.selectedPlans);
     console.log('populate period:' + this.selectedPeriods);
-    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, undefined);
+    console.log('populate current/modfied:' + this.selectedCurrentModified);
+
+    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods,  this.selectedCurrentModified);
   }
 
   selectCurrentModifiedAll() {
@@ -210,7 +215,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
       }
     }
 
-    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, undefined);
+    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods,  this.selectedCurrentModified);
 
   }
 
@@ -227,7 +232,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
         this.selectedPeriods.push(i.period);
       }
     }
-    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, undefined);
+    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods,  this.selectedCurrentModified);
   }
 
   checkIfAllCurrentModifiedSelected() {
@@ -239,7 +244,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
     for (const i of this.currentModifiedSelector) {
       if (i.selected) {
-        this.selectedCurrentModified.push(i.period);
+        this.selectedCurrentModified.push(i.currentModified);
       }
     }
 
@@ -247,6 +252,9 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
     console.log('populate plans: ' + this.selectedPlans);
     console.log('populate period:' + this.selectedPeriods);
     console.log('populate current/modfied:' + this.selectedCurrentModified);
+
+    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, this.selectedCurrentModified);
+
 
   }
 
@@ -285,12 +293,6 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
     for (const item of this.projectionData.getCurrentModified()) {
       innercColumns[item] = this.categories;
     }
-
-
-
-    // define X & Y domains
-    //    const xDomain = this.projectionData.getGraphPeriod();
-    //    const yDomain = [0, d3.max(this.projectionData.getGraphData(), (d) => d['total'])];
 
     // create scales
     this.x0Scale = d3.scaleBand().domain(this.projectionData.getPeriods().map(String))
