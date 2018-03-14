@@ -64,7 +64,8 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
       this.ReCreateChartData();
 
-      this.updateChart(this.jsonData, this.categories, undefined, undefined, undefined);
+      this.updateChart(this.jsonData, this.categories, this.projectionData.getPlans(), this.projectionData.getPeriods(),
+       this.projectionData.getCurrentModified());
 
       this.createSelector();
 
@@ -173,7 +174,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
     console.log('populate period:' + this.selectedPeriods);
     console.log('populate current/modfied:' + this.selectedCurrentModified);
 
-    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods,  this.selectedCurrentModified);
+    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, this.selectedCurrentModified);
   }
 
   selectCurrentModifiedAll() {
@@ -215,7 +216,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
       }
     }
 
-    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods,  this.selectedCurrentModified);
+    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, this.selectedCurrentModified);
 
   }
 
@@ -232,7 +233,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
         this.selectedPeriods.push(i.period);
       }
     }
-    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods,  this.selectedCurrentModified);
+    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, this.selectedCurrentModified);
   }
 
   checkIfAllCurrentModifiedSelected() {
@@ -412,7 +413,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
   updateChart(jsonData: Array<any>, categories: Array<string>,
     plans?: Array<number>, periods?: Array<number>, currentModified?: Array<string>) {
 
-    const cm = ['Modified', 'Current'];
+    // const cm = ['Modified', 'Current'];
 
     // update data
     // this.projectionData.processGraphData(this.jsonData, this.categories, [1], [0, 1, 2, 5], undefined);
@@ -423,9 +424,9 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
     this.graphData = this.projectionData.getGraphData();
 
-    for (const i of this.graphData) {
-      console.log(i);
-    }
+    // for (const i of this.graphData) {
+    //   console.log(i);
+    // }
 
 
 
@@ -466,19 +467,24 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
     // if current modified is selected
     // abc.selectAll('.bar.Current').remove();
 
+    // if (currentModified.length === 1) {
+
+    // }
+
     const barUpdate = abc.selectAll('.bar')
       .data(function (d) {
-        // console.log(d);
+        console.log(d['stackNumber']);
         return d['stackNumber'];
       });
 
+    console.log(barUpdate);
 
     barUpdate.exit().remove();
 
     barUpdate
 
       .transition()
-      .attr('width', d => (d['display'] === 0 && cm.length !== 1) ? this.x1Scale.bandwidth() * 2 : this.x1Scale.bandwidth())
+      .attr('width', d => (d['display'] === 0 && currentModified.length !== 1) ? this.x1Scale.bandwidth() * 2 : this.x1Scale.bandwidth())
       .attr('x', d => this.x1Scale(d['column']))
       .attr('y', d => this.yScale(d['yEnd']))
       .attr('height', d => this.yScale(d['yBegin']) - this.yScale(d['yEnd']));
@@ -500,7 +506,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
       .enter().append('rect')
       .classed('bar', true)
       .transition()
-      .attr('width', d => (d['display'] === 0 && cm.length !== 1) ? this.x1Scale.bandwidth() * 2 : this.x1Scale.bandwidth())
+      .attr('width', d => (d['display'] === 0 && currentModified.length !== 1) ? this.x1Scale.bandwidth() * 2 : this.x1Scale.bandwidth())
       .attr('x', d => this.x1Scale(d['column']))
       .attr('y', d => this.yScale(d['yEnd']))
       .attr('height', d => this.yScale(d['yBegin']) - this.yScale(d['yEnd']))
