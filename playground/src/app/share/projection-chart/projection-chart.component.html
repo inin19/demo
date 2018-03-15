@@ -3,9 +3,9 @@
 
 <div class="row">
 
-    <div id='selector' class="col-3">
+    <div id='selector' class="col-2">
 
-         <!-- ----------------test IE -->
+        <!-- ----------------test IE -->
         <!-- <ul>
             <li>
                 <input type="checkbox" [(ngModel)]="selectedPlanAll" /> (All Plans)
@@ -47,12 +47,21 @@
             </li>
         </ul>
 
+        <!-- categories -->
 
+        <ul>
+            <li>
+                <input type="checkbox" [(ngModel)]="selectedCategoryAll" (change)="selectCategoryAll()" /> (All)
+            </li>
+            <li *ngFor="let n of categorySelector">
+                <input type="checkbox" [(ngModel)]="n.selected" (change)="checkIfAllCategorySelected()"> {{n.category}}
+            </li>
+        </ul>
 
 
     </div>
 
 
-    <div id='chart' #chart class="col-9"></div>
+    <div id='chart' #chart class="col-10"></div>
 
 </div>

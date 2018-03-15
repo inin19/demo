@@ -1,6 +1,7 @@
 import { Component, OnInit, OnChanges, ViewChild, Input, ElementRef, ViewEncapsulation } from '@angular/core';
 import { ProjectionData } from './../model/projectionData.model';
 import * as d3 from 'd3';
+// import * as legend from 'd3-svg-legend';
 
 
 @Component({
@@ -21,7 +22,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
   @Input() private jsonData: Array<any>;
 
-  private margin: any = { top: 30, right: 60, bottom: 30, left: 60 };
+  private margin: any = { top: 30, right: 100, bottom: 30, left: 60 };
   private chart: any;
   private width: number;
   private height: number;
@@ -31,7 +32,13 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
   private colors: any;
   private xAxis: any;
   private yAxis: any;
-  // private svg: any;
+  private newColors: any = {
+    EMPLOYER_PREMIUM: '#5cbae6',
+    FUNDING_GAP: '#fac364',
+    MEMBER_PREMIUM: '#b6d957',
+    TAX: '#d998cb',
+    FEES: '#93b9c6'
+  };
 
 
   // related to selectors
@@ -39,16 +46,21 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
   public selectedPlanAll: any;
   public selectedPeriodAll: any;
   public selectedCurrentProposedAll: any;
+  public selectedCategoryAll: any;
+
 
   public plansSelector: Array<any>;
   public periodSelector: Array<any>;
   public currentProposedSelector: Array<any>;
+  public categorySelector: Array<any>;
+
 
   // arrays for selectors
-
+  // maintaining current selection
   selectedPlans: Array<number>;
   selectedPeriods: Array<number>;
   selectedCurrentProposed: Array<string>;
+  selectedCategories: Array<string>;
 
 
   constructor() {
@@ -59,7 +71,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
     if (this.chart) {
 
-      this.ReCreateChartData();
+      this.CreateChartData();
       this.updateChart(this.jsonData, this.categories, this.projectionData.getPlans(), this.projectionData.getPeriods(),
         this.projectionData.getCurrentProposed());
       this.createSelector();
@@ -67,16 +79,27 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
+
+    // console.log(this.getColorCode('TAX'));
+
+
     this.createChart();
+
+    this.createSelector();
     this.updateChart(this.jsonData, this.categories, this.projectionData.getPlans(), this.projectionData.getPeriods(),
       this.projectionData.getCurrentProposed());
-    this.createSelector();
+    this.createLegend();
+  }
+
+
+  getColorCode(category: string): string {
+    return this.newColors[category];
   }
 
 
   createSelector() {
 
-    // Initial Plan Selectors
+    // initialize Plan Selectors
     this.plansSelector = new Array();
     this.selectedPlanAll = true;
     this.selectedPlans = new Array();
@@ -86,7 +109,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
       this.selectedPlans.push(i);
     }
 
-    // Initial Period Selectors
+    // initialize Period Selectors
     this.periodSelector = new Array();
     this.selectedPeriodAll = true;
     this.selectedPeriods = new Array();
@@ -97,9 +120,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
     }
 
 
-
-
-    // Initial CurrentProposed Selectors
+    // initialize CurrentProposed Selectors
     this.currentProposedSelector = new Array();
     this.selectedCurrentProposedAll = true;
     this.selectedCurrentProposed = new Array();
@@ -110,8 +131,72 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
     }
 
 
+    // initialize Category Selectors
+    this.categorySelector = new Array();
+    this.selectedCategoryAll = true;
+    this.selectedCategories = new Array();
+
+    for (const i of this.projectionData.getCategories()) {
+      this.categorySelector.push({ category: i, selected: true });
+      this.selectedCategories.push(i);
+    }
+
 
   }
+
+
+
+  selectCategoryAll() {
+    this.selectedCategories = [];
+    for (const i of this.categorySelector) {
+      i.selected = this.selectedCategoryAll;
+    }
+
+    if (this.selectedCategoryAll) {
+      for (const i of this.categorySelector) {
+        this.selectedCategories.push(i.category);
+      }
+    }
+
+    this.updateChart(this.jsonData, this.selectedCategories, this.selectedPlans, this.selectedPeriods, this.selectedCurrentProposed);
+
+
+  }
+
+  checkIfAllCategorySelected() {
+    this.selectedCategoryAll = this.categorySelector.every(function (item: any) {
+      return item.selected === true;
+    });
+
+    this.selectedCategories = [];
+
+    for (const i of this.categorySelector) {
+      if (i.selected) {
+        this.selectedCategories.push(i.category);
+      }
+    }
+
+    this.updateChart(this.jsonData, this.selectedCategories, this.selectedPlans, this.selectedPeriods, this.selectedCurrentProposed);
+
+
+  }
+
+
+  checkIfAllPlanSelected() {
+    this.selectedPlanAll = this.plansSelector.every(function (item: any) {
+      return item.selected === true;
+    });
+
+    this.selectedPlans = [];
+
+    for (const i of this.plansSelector) {
+      if (i.selected) {
+        this.selectedPlans.push(i.plan);
+      }
+    }
+    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, this.selectedCurrentProposed);
+  }
+
 
   selectPlanAll() {
 
@@ -163,20 +248,9 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
   }
 
-  checkIfAllPlanSelected() {
-    this.selectedPlanAll = this.plansSelector.every(function (item: any) {
-      return item.selected === true;
-    });
 
-    this.selectedPlans = [];
 
-    for (const i of this.plansSelector) {
-      if (i.selected) {
-        this.selectedPlans.push(i.plan);
-      }
-    }
-    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, this.selectedCurrentProposed);
-  }
+
   checkIfAllPeriodSelected() {
     this.selectedPeriodAll = this.periodSelector.every(function (item: any) {
       return item.selected === true;
@@ -240,18 +314,12 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
     this.x1Scale = d3.scaleBand().domain(d3.keys(innercColumns))
       .range([0, this.x0Scale.bandwidth()])
-      .paddingInner(0.1);
+      .paddingInner(0.2);
 
     this.yScale = d3.scaleLinear()
       .domain([0, d3.max(this.projectionData.getGraphData(), (d) => d['total'])])
       .range([this.height, 0]);
 
-    // bar colors
-
-    this.colors = d3.scaleOrdinal(['#3366cc', '#dc3912', '#ff9900', '#109618', '#990099', '#0099c6', '#dd4477', '#66aa00', '#b82e2e',
-      '#316395', '#994499', '#22aa99', '#aaaa11', '#6633cc', '#e67300', '#8b0707', '#651067', '#329262', '#5574a6', '#3b3eac']);
-
-    this.colors.domain(this.categories);
 
     // x & y axis
     const xaxis = d3.axisBottom(this.x0Scale)
@@ -270,6 +338,10 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
     this.yAxis = this.chart.append('g')
       .attr('class', 'y axis')
       .call(yaxis);
+
+
+
+
   }
 
   updateChart(jsonData: Array<any>, categories: Array<string>,
@@ -333,7 +405,10 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
       .attr('width', d => (d['display'] === 0 && currentProposed.length !== 1) ? this.x1Scale.bandwidth() * 2 : this.x1Scale.bandwidth())
       .attr('x', d => this.x1Scale(d['column']))
       .attr('y', d => this.yScale(d['yEnd']))
-      .attr('height', d => this.yScale(d['yBegin']) - this.yScale(d['yEnd']));
+      .attr('height', d => this.yScale(d['yBegin']) - this.yScale(d['yEnd']))
+      .style('fill', d => this.getColorCode(d['name']))
+
+      .style('stroke', d => this.getColorCode(d['name']));
 
     // adding new bars
     bars
@@ -345,19 +420,47 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
       .attr('x', d => this.x1Scale(d['column']))
       .attr('y', d => this.yScale(d['yEnd']))
       .attr('height', d => this.yScale(d['yBegin']) - this.yScale(d['yEnd']))
-      .style('fill', d => this.colors(d['name']))
-      .style('stroke', d => this.colors(d['name']))
-      .style('fill-opacity', 0.7);
+      // .style('fill', d => this.colors(d['name']))
+      .style('fill', d => this.getColorCode(d['name']))
 
+      .style('stroke', d => this.getColorCode(d['name']));
 
   }
 
 
-  ReCreateChartData() {
+  CreateChartData() {
     this.projectionData = new ProjectionData(this.jsonData, this.categories);
     this.graphData = this.projectionData.getGraphData();
   }
 
+
+  createLegend() {
+
+    const legend = this.chart.append('g')
+      .classed('legend', true)
+      .attr('font-family', 'sans-serif')
+      .attr('font-size', 10)
+      .attr('text-anchor', 'end')
+      .selectAll('.legend')
+      .data(this.selectedCategories.reverse())
+      .enter()
+      .append('g')
+      .attr('transform', function (d, i) { return 'translate(0,' + i * 20 + ')'; });
+
+
+    legend.append('rect')
+      .attr('x', this.width - 19)
+      .attr('width', 19)
+      .attr('height', 19)
+      .attr('fill', d => this.getColorCode(d));
+
+    legend.append('text')
+      .attr('x', this.width - 24)
+      .attr('y', 9.5)
+      .attr('dy', '0.32em')
+      .text(function (d) { return d; });
+
+  }
 
 
 }

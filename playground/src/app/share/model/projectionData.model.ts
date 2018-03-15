@@ -111,6 +111,11 @@ export class ProjectionData {
         }
 
 
+        // graph cetegories is determined by country
+        this.graphCategory = categories;
+
+
+
         // --------------------------------------------------------------------------------------------------------------------------
         // Transform data
 
