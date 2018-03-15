@@ -36,14 +36,14 @@
         </ul>
 
 
-        <!-- current/modified -->
+        <!-- current/proposed -->
 
         <ul>
             <li>
-                <input type="checkbox" [(ngModel)]="selectedCurrentModifiedAll" (change)="selectCurrentModifiedAll()" /> (All)
+                <input type="checkbox" [(ngModel)]="selectedCurrentProposedAll" (change)="selectCurrentProposedAll()" /> (All)
             </li>
-            <li *ngFor="let n of currentModifiedSelector">
-                <input type="checkbox" [(ngModel)]="n.selected" (change)="checkIfAllCurrentModifiedSelected()"> {{n.currentModified}}
+            <li *ngFor="let n of currentProposedSelector">
+                <input type="checkbox" [(ngModel)]="n.selected" (change)="checkIfAllCurrentProposedSelected()"> {{n.currentProposed}}
             </li>
         </ul>
 

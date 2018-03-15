@@ -1,10 +1,11 @@
-import { Component, OnInit, OnChanges, ViewChild, Input, ElementRef } from '@angular/core';
+import { Component, OnInit, OnChanges, ViewChild, Input, ElementRef, ViewEncapsulation } from '@angular/core';
 import { ProjectionData } from './../model/projectionData.model';
 import * as d3 from 'd3';
 
 
 @Component({
   selector: 'app-projection-chart',
+  encapsulation: ViewEncapsulation.None,
   templateUrl: './projection-chart.component.html',
   styleUrls: ['./projection-chart.component.css']
 })
@@ -37,17 +38,17 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
   public selectedPlanAll: any;
   public selectedPeriodAll: any;
-  public selectedCurrentModifiedAll: any;
+  public selectedCurrentProposedAll: any;
 
   public plansSelector: Array<any>;
   public periodSelector: Array<any>;
-  public currentModifiedSelector: Array<any>;
+  public currentProposedSelector: Array<any>;
 
   // arrays for selectors
 
   selectedPlans: Array<number>;
   selectedPeriods: Array<number>;
-  selectedCurrentModified: Array<string>;
+  selectedCurrentProposed: Array<string>;
 
 
   constructor() {
@@ -60,7 +61,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
       this.ReCreateChartData();
       this.updateChart(this.jsonData, this.categories, this.projectionData.getPlans(), this.projectionData.getPeriods(),
-        this.projectionData.getCurrentModified());
+        this.projectionData.getCurrentProposed());
       this.createSelector();
     }
   }
@@ -68,7 +69,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
   ngOnInit() {
     this.createChart();
     this.updateChart(this.jsonData, this.categories, this.projectionData.getPlans(), this.projectionData.getPeriods(),
-      this.projectionData.getCurrentModified());
+      this.projectionData.getCurrentProposed());
     this.createSelector();
   }
 
@@ -98,22 +99,17 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
 
 
-    // Initial CurrentModified Selectors
-    this.currentModifiedSelector = new Array();
-    this.selectedCurrentModifiedAll = true;
-    this.selectedCurrentModified = new Array();
+    // Initial CurrentProposed Selectors
+    this.currentProposedSelector = new Array();
+    this.selectedCurrentProposedAll = true;
+    this.selectedCurrentProposed = new Array();
 
-    for (const i of this.projectionData.getCurrentModified()) {
-      this.currentModifiedSelector.push({ currentModified: i, selected: true });
-      this.selectedCurrentModified.push(i);
+    for (const i of this.projectionData.getCurrentProposed()) {
+      this.currentProposedSelector.push({ currentProposed: i, selected: true });
+      this.selectedCurrentProposed.push(i);
     }
 
 
-
-
-    // console.log('populate plans: ' + this.selectedPlans);
-    // console.log('populate period:' + this.selectedPeriods);
-    // console.log('populate Current/Modified:' + this.selectedCurrentModified);
 
   }
 
@@ -129,7 +125,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
         this.selectedPlans.push(i.plan);
       }
     }
-    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, this.selectedCurrentModified);
+    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, this.selectedCurrentProposed);
   }
 
 
@@ -145,25 +141,25 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
       }
     }
 
-    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, this.selectedCurrentModified);
+    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, this.selectedCurrentProposed);
   }
 
-  selectCurrentModifiedAll() {
-    this.selectedCurrentModified = [];
-    for (const i of this.currentModifiedSelector) {
-      i.selected = this.selectedCurrentModifiedAll;
+  selectCurrentProposedAll() {
+    this.selectedCurrentProposed = [];
+    for (const i of this.currentProposedSelector) {
+      i.selected = this.selectedCurrentProposedAll;
     }
 
 
-    if (this.selectedCurrentModifiedAll) {
-      for (const i of this.currentModifiedSelector) {
-        this.selectedCurrentModified.push(i.currentModified);
+    if (this.selectedCurrentProposedAll) {
+      for (const i of this.currentProposedSelector) {
+        this.selectedCurrentProposed.push(i.currentProposed);
       }
     }
-    console.log('populate plans: ' + this.selectedPlans);
-    console.log('populate period:' + this.selectedPeriods);
-    console.log('populate current/modfied:' + this.selectedCurrentModified);
-    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, this.selectedCurrentModified);
+    // console.log('populate plans: ' + this.selectedPlans);
+    // console.log('populate period:' + this.selectedPeriods);
+    // console.log('populate current/modfied:' + this.selectedCurrentProposed);
+    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, this.selectedCurrentProposed);
 
   }
 
@@ -179,7 +175,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
         this.selectedPlans.push(i.plan);
       }
     }
-    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, this.selectedCurrentModified);
+    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, this.selectedCurrentProposed);
   }
   checkIfAllPeriodSelected() {
     this.selectedPeriodAll = this.periodSelector.every(function (item: any) {
@@ -191,23 +187,23 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
         this.selectedPeriods.push(i.period);
       }
     }
-    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, this.selectedCurrentModified);
+    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, this.selectedCurrentProposed);
   }
 
-  checkIfAllCurrentModifiedSelected() {
-    this.selectedCurrentModifiedAll = this.currentModifiedSelector.every(function (item: any) {
+  checkIfAllCurrentProposedSelected() {
+    this.selectedCurrentProposedAll = this.currentProposedSelector.every(function (item: any) {
       return item.selected === true;
     });
 
-    this.selectedCurrentModified = [];
+    this.selectedCurrentProposed = [];
 
-    for (const i of this.currentModifiedSelector) {
+    for (const i of this.currentProposedSelector) {
       if (i.selected) {
-        this.selectedCurrentModified.push(i.currentModified);
+        this.selectedCurrentProposed.push(i.currentProposed);
       }
     }
 
-    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, this.selectedCurrentModified);
+    this.updateChart(this.jsonData, this.categories, this.selectedPlans, this.selectedPeriods, this.selectedCurrentProposed);
   }
 
   createChart() {
@@ -231,11 +227,11 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
     const innercColumns = {};
 
-    for (const item of this.projectionData.getCurrentModified()) {
+    for (const item of this.projectionData.getCurrentProposed()) {
       innercColumns[item] = this.categories;
     }
 
-    console.log(innercColumns);
+    // console.log(innercColumns);
 
     // create scales
     this.x0Scale = d3.scaleBand().domain(this.projectionData.getPeriods().map(String))
@@ -260,7 +256,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
     // x & y axis
     const xaxis = d3.axisBottom(this.x0Scale)
       .tickSizeOuter(0)
-      .tickFormat((d) => d === '0' ? 'Current Policy' : 'period ' + d);
+      .tickFormat((d) => d === '0' ? 'Current Policy' : 'Period ' + d);
 
     const yaxis = d3.axisLeft(this.yScale)
       .tickSizeOuter(0)
@@ -277,22 +273,22 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
   }
 
   updateChart(jsonData: Array<any>, categories: Array<string>,
-    plans?: Array<number>, periods?: Array<number>, currentModified?: Array<string>) {
+    plans?: Array<number>, periods?: Array<number>, currentProposed?: Array<string>) {
 
-    this.projectionData.processGraphData(jsonData, categories, plans, periods, currentModified);
+    this.projectionData.processGraphData(jsonData, categories, plans, periods, currentProposed);
 
     this.graphData = this.projectionData.getGraphData();
 
     // update scale
     this.x0Scale.domain(this.projectionData.getPeriods().map(String));
     this.yScale.domain([0, d3.max(this.projectionData.getGraphData(), (d) => d['total'])]);
-    this.x1Scale.domain(this.projectionData.getCurrentModified())
+    this.x1Scale.domain(this.projectionData.getCurrentProposed())
       .range([0, this.x0Scale.bandwidth()]);
 
     // update axis
     const xaxis = d3.axisBottom(this.x0Scale)
       .tickSizeOuter(0)
-      .tickFormat((d) => d === '0' ? 'Current Policy' : 'period ' + d);
+      .tickFormat((d) => d === '0' ? 'Current Policy' : 'Period ' + d);
 
     this.xAxis.transition().call(xaxis);
 
@@ -334,7 +330,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
     // update existing bars
     bars
       .transition()
-      .attr('width', d => (d['display'] === 0 && currentModified.length !== 1) ? this.x1Scale.bandwidth() * 2 : this.x1Scale.bandwidth())
+      .attr('width', d => (d['display'] === 0 && currentProposed.length !== 1) ? this.x1Scale.bandwidth() * 2 : this.x1Scale.bandwidth())
       .attr('x', d => this.x1Scale(d['column']))
       .attr('y', d => this.yScale(d['yEnd']))
       .attr('height', d => this.yScale(d['yBegin']) - this.yScale(d['yEnd']));
@@ -345,7 +341,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
       .append('rect')
       .classed('bar', true)
       .transition()
-      .attr('width', d => (d['display'] === 0 && currentModified.length !== 1) ? this.x1Scale.bandwidth() * 2 : this.x1Scale.bandwidth())
+      .attr('width', d => (d['display'] === 0 && currentProposed.length !== 1) ? this.x1Scale.bandwidth() * 2 : this.x1Scale.bandwidth())
       .attr('x', d => this.x1Scale(d['column']))
       .attr('y', d => this.yScale(d['yEnd']))
       .attr('height', d => this.yScale(d['yBegin']) - this.yScale(d['yEnd']))

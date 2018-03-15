@@ -6,25 +6,27 @@ export class ProjectionData {
 
     private ndx: any;
     private planDimension: any;
-    private periodDimension: any;
-    private currentModifiedDimension: any;
     private otherDimension: any;
+    // private categoryDimension: any;
+    // private currentProposedDimension: any;
+    // private periodDimension: any;
 
 
-    // group
+
+    // groups
     private otherDimensionGroup: any;
-    private planDimensionGroup: any;
 
 
-    private data_filteredByPlan: any;
-    private data_filteredByPlanReduced: any;
+    // data aggreate
+    private proposalAggregateData: any;
 
 
     // Output
     private graphData: Array<any>;
     private graphPeriod: Array<number>;
-    private graphCurrentModified: Array<string>;
+    private graphCurrentProposed: Array<string>;
     private graphPlan: Array<number>;
+    private graphCategory: Array<string>;
 
 
 
@@ -39,70 +41,67 @@ export class ProjectionData {
 
         // Create Dimensions : Plan, period, Current/Modifeid, Other
         this.planDimension = this.ndx.dimension((d) => d.planId);
-        this.periodDimension = this.ndx.dimension((d) => d.period);
-        this.currentModifiedDimension = this.ndx.dimension((d) => d.currentModified);
+
+        // may used them later
+
+        // this.periodDimension = this.ndx.dimension((d) => d.period);
+        // this.currentProposedDimension = this.ndx.dimension((d) => d.currentProposed);
+        // this.categoryDimension = this.ndx.dimension((d) => d.category);
+
         this.otherDimension = this.ndx.dimension((d) => JSON.stringify({
             'period': d.period,
-            'currentModified': d.currentModified,
+            'currentProposed': d.currentProposed,
             'category': d.category
         }));
 
         // Create Groups
         this.otherDimensionGroup = this.otherDimension.group();
-        this.planDimensionGroup = this.planDimension.group();
+
 
         this.otherDimensionGroup.all().forEach(function (d) {
-            // parse the json string created above
             d.key = JSON.parse(d.key);
-            // filtered indicator, 0 means filtered out
-            d.extra = d.value;
         });
     }
 
 
     processGraphData(data: Array<any>, categories: Array<string>, plans?: Array<number>, periods?: Array<number>,
-        currentmodified?: Array<string>) {
+        currentProposed?: Array<string>) {
 
 
         // Apply Filters
         if (plans) {
             this.planDimension.filter((d) => plans.indexOf(d) !== -1);
         }
-        if (periods) {
-            this.periodDimension.filter((d) => periods.indexOf(d) !== -1);
-        } else {
-            // console.log(periods);
-            // this.periodDimension.filterAll();
-        }
-        if (currentmodified) {
-            this.currentModifiedDimension.filter((d) => currentmodified.indexOf(d) !== -1);
-        }
-        // Prepform Group by and fitler out the groups that does not apply
-        this.data_filteredByPlan = this.otherDimensionGroup.reduceSum(function (d) { return d.value; }).all();
+
+        // no use use dropdown to pass selector
+
+        // if (periods) {
+        //     this.periodDimension.filter((d) => periods.indexOf(d) !== -1);
+        // }
+
+        // if (currentProposed) {
+        //     this.currentProposedDimension.filter((d) => currentProposed.indexOf(d) !== -1);
+        // }
+
+
+
+        // aggregate plans data to proposal level
+        this.proposalAggregateData = this.otherDimensionGroup.reduceSum(function (d) { return d.value; }).all();
 
 
 
 
 
-
-        // this.data_filteredByPlanReduced = this.data_filteredByPlan.filter((d) => (d.extra !== 0));
-
-
-        this.data_filteredByPlanReduced = this.data_filteredByPlan.filter((d) => (d.value !== -999));
-
-
-
-        // ? better way  get period number
         if (periods) {
             this.graphPeriod = periods;
         } else {
-            this.graphPeriod = [0, 1, 2, 3, 4, 5];
+            this.graphPeriod = Array.from(new Set(data.map(item => item.period)));
         }
 
-        if (currentmodified) {
-            this.graphCurrentModified = currentmodified;
+        if (currentProposed) {
+            this.graphCurrentProposed = currentProposed;
         } else {
-            this.graphCurrentModified = ['Current', 'Modified'];
+            this.graphCurrentProposed = Array.from(new Set(data.map(item => item.currentProposed)));
         }
 
         if (plans) {
@@ -110,7 +109,6 @@ export class ProjectionData {
         } else {
             this.graphPlan = Array.from(new Set(data.map(item => item.planId)));
         }
-
 
 
         // --------------------------------------------------------------------------------------------------------------------------
@@ -121,14 +119,14 @@ export class ProjectionData {
         for (const periodNumber of this.graphPeriod) {
             const yColumn = new Array();
             const Current = new Array();
-            const Modified = new Array();
+            const Proposed = new Array();
 
             let y1Begin = 0;
             let y2Begin = 0;
 
             categories.forEach(el => {
 
-                if (this.graphCurrentModified.indexOf('Current') !== -1) {
+                if (this.graphCurrentProposed.indexOf('Current') !== -1) {
 
                     // populate current
                     if (!yColumn['Current']) {
@@ -136,9 +134,9 @@ export class ProjectionData {
                     }
                     y1Begin = yColumn['Current'];
 
-                    const curr = this.data_filteredByPlanReduced.filter(function (d) {
+                    const curr = this.proposalAggregateData.filter(function (d) {
                         return (d.key['period'] === +periodNumber) && (d.key['category'] === el)
-                            && (d.key['currentModified'] === 'Current');
+                            && (d.key['currentProposed'] === 'Current');
                     })[0].value;
 
                     yColumn['Current'] += + curr;
@@ -166,25 +164,25 @@ export class ProjectionData {
 
                 }
 
-                if (this.graphCurrentModified.indexOf('Modified') !== -1) {
-                    // populate modified
-                    if (!yColumn['Modified']) {
-                        yColumn['Modified'] = 0;
+                if (this.graphCurrentProposed.indexOf('Proposed') !== -1) {
+                    // populate Proposed
+                    if (!yColumn['Proposed']) {
+                        yColumn['Proposed'] = 0;
                     }
-                    y2Begin = yColumn['Modified'];
+                    y2Begin = yColumn['Proposed'];
 
-                    const modified = this.data_filteredByPlanReduced.filter(function (d) {
+                    const proposed = this.proposalAggregateData.filter(function (d) {
                         return (d.key['period'] === +periodNumber) && (d.key['category'] === el)
-                            && (d.key['currentModified'] === 'Modified');
+                            && (d.key['currentProposed'] === 'Proposed');
                     })[0].value;
-                    yColumn['Modified'] += modified;
-                    Modified.push({
+                    yColumn['Proposed'] += proposed;
+                    Proposed.push({
                         display: 1,
                         period: periodNumber,
                         name: el,
-                        column: 'Modified',
+                        column: 'Proposed',
                         yBegin: y2Begin,
-                        yEnd: +modified + y2Begin
+                        yEnd: +proposed + y2Begin
                     });
 
                 }
@@ -193,8 +191,8 @@ export class ProjectionData {
 
             this.graphData.push({
                 period: periodNumber,
-                stackNumber: Current.concat(Modified),
-                total: d3.max(Current.concat(Modified), function (d) {
+                stackNumber: Current.concat(Proposed),
+                total: d3.max(Current.concat(Proposed), function (d) {
                     return d['yEnd'];
                 })
             });
@@ -208,21 +206,20 @@ export class ProjectionData {
 
 
     // only used to populate seletors
-
     getPeriods(): Array<number> {
-        // console.log('graphPeriod used');
         return this.graphPeriod;
     }
 
-    getCurrentModified(): Array<string> {
-        // console.log('Current Modified used');
-        return this.graphCurrentModified;
+    getCurrentProposed(): Array<string> {
+        return this.graphCurrentProposed;
     }
 
 
     getPlans(): Array<number> {
-        // console.log('graph plans used');
         return this.graphPlan;
     }
 
+    getCategories(): Array<string> {
+        return this.graphCategory;
+    }
 }
