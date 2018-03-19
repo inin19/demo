@@ -1,0 +1,7 @@
+<mat-form-field>
+    <!-- (selectionChange)="toggle()" -->
+  <mat-select placeholder="Plans" [formControl]="toppings" multiple>
+    <mat-option [value]="All" selected>All</mat-option>
+    <mat-option *ngFor="let topping of toppingList" [value]="topping"  >{{topping}}</mat-option>
+  </mat-select>
+</mat-form-field>

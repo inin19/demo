@@ -1,5 +1,7 @@
 import { Component, OnInit, OnChanges, ViewChild, Input, ElementRef, ViewEncapsulation } from '@angular/core';
 import { ProjectionData } from './../model/projectionData.model';
+import { FormControl } from '@angular/forms';
+import { MatSelectChange, MatSelect } from '@angular/material/select';
 import * as d3 from 'd3';
 // import * as legend from 'd3-svg-legend';
 
@@ -22,7 +24,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
   @Input() private jsonData: Array<any>;
 
-  private margin: any = { top: 30, right: 100, bottom: 30, left: 60 };
+  private margin: any = { top: 30, right: 180, bottom: 30, left: 60 };
   private chart: any;
   private width: number;
   private height: number;
@@ -39,6 +41,12 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
     TAX: '#d998cb',
     FEES: '#93b9c6'
   };
+
+
+  private element: any;
+
+
+
 
 
   // related to selectors
@@ -63,6 +71,14 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
   selectedCategories: Array<string>;
 
 
+
+
+  // use new UI
+
+  planForms: FormControl;
+
+
+
   constructor() {
   }
 
@@ -80,15 +96,30 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
   ngOnInit() {
 
+
+    this.categories = ['EMPLOYER_PREMIUM', 'FUNDING_GAP', 'MEMBER_PREMIUM', 'TAX', 'FEES'];
+
+
     // console.log(this.getColorCode('TAX'));
+
+
+    this.CreateChartData();
+
+    this.planForms = new FormControl();
+
 
 
     this.createChart();
 
     this.createSelector();
+
+
+
     this.updateChart(this.jsonData, this.categories, this.projectionData.getPlans(), this.projectionData.getPeriods(),
       this.projectionData.getCurrentProposed());
     this.createLegend();
+
+
   }
 
 
@@ -96,6 +127,11 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
     return this.newColors[category];
   }
 
+
+
+  allClick() {
+    console.log('log this');
+  }
 
   createSelector() {
 
@@ -200,6 +236,8 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
   selectPlanAll() {
 
+    console.log('selected');
+
     this.selectedPlans = [];
     for (const i of this.plansSelector) {
       i.selected = this.selectedPlanAll;
@@ -285,13 +323,13 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
     this.projectionData = new ProjectionData(this.jsonData, this.categories);
     this.graphData = this.projectionData.getGraphData();
 
-    const element = this.chartContainer.nativeElement;
-    this.width = element.offsetWidth - this.margin.left - this.margin.right;
-    this.height = element.offsetHeight - this.margin.top - this.margin.bottom;
+    this.element = this.chartContainer.nativeElement;
+    this.width = this.element.offsetWidth - this.margin.left - this.margin.right;
+    this.height = this.element.offsetHeight - this.margin.top - this.margin.bottom;
 
     const svg = d3.select('#chart').append('svg')
-      .attr('width', element.offsetWidth)
-      .attr('height', element.offsetHeight);
+      .attr('width', this.element.offsetWidth)
+      .attr('height', this.element.offsetHeight);
 
     this.chart = svg
       .append('g')
@@ -436,26 +474,37 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
   createLegend() {
 
+    // const element = this.chartContainer.nativeElement;
+
     const legend = this.chart.append('g')
       .classed('legend', true)
       .attr('font-family', 'sans-serif')
       .attr('font-size', 10)
       .attr('text-anchor', 'end')
       .selectAll('.legend')
-      .data(this.selectedCategories.reverse())
+      .data(this.selectedCategories)
       .enter()
       .append('g')
-      .attr('transform', function (d, i) { return 'translate(0,' + i * 20 + ')'; });
+      // .attr('transform', function (d, i) { return 'translate(0,' + i * 20 + ')'; });
+      .attr('transform', (d, i) => {
+
+
+
+        // console.log('translate(0,' + (value) + ')');
+
+        return 'translate(0,' + (this.height - (i + 1) * 20) + ')';
+
+      });
 
 
     legend.append('rect')
-      .attr('x', this.width - 19)
-      .attr('width', 19)
-      .attr('height', 19)
+      .attr('x', this.element.offsetWidth - 80)
+      .attr('width', 16)
+      .attr('height', 16)
       .attr('fill', d => this.getColorCode(d));
 
     legend.append('text')
-      .attr('x', this.width - 24)
+      .attr('x', this.element.offsetWidth - 90)
       .attr('y', 9.5)
       .attr('dy', '0.32em')
       .text(function (d) { return d; });

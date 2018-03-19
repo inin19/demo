@@ -7,7 +7,7 @@
 #selector{
 
     height: 500px;
-    background-color:cornsilk; 
+    /* background-color:cornsilk;  */
 }
  
 
@@ -18,14 +18,23 @@ ul {
     padding: 0px;
 }
 
+ul li {
+    font-size: 14px;
+}
 
 
-text {
+
+.tick text {
     font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
     font-size: 14px;
     fill:#666;
 }
 
+.legend text {
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+    font-size: 12px;
+    fill:#666;
+}
 
 
 
