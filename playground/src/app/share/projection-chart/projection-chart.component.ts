@@ -117,7 +117,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
     this.updateChart(this.jsonData, this.categories, this.projectionData.getPlans(), this.projectionData.getPeriods(),
       this.projectionData.getCurrentProposed());
-    this.createLegend();
+//    this.createLegend();
 
 
   }
