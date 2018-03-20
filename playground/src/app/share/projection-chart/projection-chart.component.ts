@@ -478,12 +478,8 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
   createLegend() {
 
-    // const element = this.chartContainer.nativeElement;
-
-
     const legnedScale = d3.scaleBand().domain(this.selectedCategories)
       .rangeRound([0, this.width]);
-    // .padding(0.2);
 
 
     const legend = d3.select('#chart svg').append('g')
