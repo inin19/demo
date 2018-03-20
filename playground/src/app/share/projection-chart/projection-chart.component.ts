@@ -1,7 +1,7 @@
 import { Component, OnInit, OnChanges, ViewChild, Input, ElementRef, ViewEncapsulation } from '@angular/core';
 import { ProjectionData } from './../model/projectionData.model';
 import { FormControl } from '@angular/forms';
-import { MatSelectChange, MatSelect } from '@angular/material/select';
+// import { MatSelectChange, MatSelect } from '@angular/material/select';
 import * as d3 from 'd3';
 // import * as legend from 'd3-svg-legend';
 
@@ -24,7 +24,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
   @Input() private jsonData: Array<any>;
 
-  private margin: any = { top: 30, right: 180, bottom: 30, left: 60 };
+  private margin: any = { top: 60, right: 60, bottom: 30, left: 60 };
   private chart: any;
   private width: number;
   private height: number;
@@ -117,8 +117,9 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
     this.updateChart(this.jsonData, this.categories, this.projectionData.getPlans(), this.projectionData.getPeriods(),
       this.projectionData.getCurrentProposed());
-//    this.createLegend();
+    //    this.createLegend();
 
+    this.createLegend();
 
   }
 
@@ -472,39 +473,42 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
   }
 
 
+
+
+
   createLegend() {
 
     // const element = this.chartContainer.nativeElement;
 
-    const legend = this.chart.append('g')
+
+    const legnedScale = d3.scaleBand().domain(this.selectedCategories)
+      .rangeRound([0, this.width]);
+    // .padding(0.2);
+
+
+    const legend = d3.select('#chart svg').append('g')
       .classed('legend', true)
       .attr('font-family', 'sans-serif')
       .attr('font-size', 10)
-      .attr('text-anchor', 'end')
+      .attr('transform', `translate(${this.margin.left},0)`)
+      // .attr('text-anchor', 'end')
       .selectAll('.legend')
       .data(this.selectedCategories)
       .enter()
       .append('g')
-      // .attr('transform', function (d, i) { return 'translate(0,' + i * 20 + ')'; });
       .attr('transform', (d, i) => {
-
-
-
-        // console.log('translate(0,' + (value) + ')');
-
-        return 'translate(0,' + (this.height - (i + 1) * 20) + ')';
-
+        return 'translate(' + legnedScale(d) + ',0)';
       });
 
 
     legend.append('rect')
-      .attr('x', this.element.offsetWidth - 80)
+      .attr('x', 0)
       .attr('width', 16)
       .attr('height', 16)
       .attr('fill', d => this.getColorCode(d));
 
     legend.append('text')
-      .attr('x', this.element.offsetWidth - 90)
+      .attr('x', 20)
       .attr('y', 9.5)
       .attr('dy', '0.32em')
       .text(function (d) { return d; });
