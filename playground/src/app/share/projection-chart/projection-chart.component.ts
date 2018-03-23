@@ -486,35 +486,8 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
     // update size
     this.element = this.chartContainer.nativeElement;
 
-    console.log(this.element.offsetWidth);
-
     const legnedScale = d3.scaleBand().domain(this.selectedCategories)
       .rangeRound([0, this.element.offsetWidth]);
-
-
-
-    // pattern
-
-    // update chart
-    // let groups = this.chart.selectAll('.group')
-    //   .data(this.graphData);
-
-    // groups.exit().remove();
-
-
-
-    // // update existing groups
-    // groups
-    //   .attr('transform', d => 'translate(' + this.x0Scale(d['period']) + ',0)');
-
-    // // adding new groups
-    // groups
-    //   .enter().append('g')
-    //   .classed('group', true)
-    //   .attr('transform', d => 'translate(' + this.x0Scale(d['period']) + ',0)');
-
-
-
 
     let legend = d3.select('#chart svg').selectAll('.legend')
       .data(this.selectedCategories);
@@ -563,9 +536,6 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
     legendText.exit().remove();
 
-
-
-
     rects
       .enter()
       .append('rect')
@@ -585,50 +555,13 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
       .text(function (d) { return d; });
 
 
-
-
-    // const legend = d3.select('#chart svg').append('g')
-    //   .classed('legend', true)
-    //   .attr('font-family', 'sans-serif')
-    //   .attr('font-size', 10)
-    //   // .attr('transform', `translate(${this.margin.left},0)`)
-    //   // .attr('text-anchor', 'end')
-    //   .selectAll('.legend')
-    //   .data(this.selectedCategories)
-    //   .enter()
-    //   .append('g')
-    //   .attr('transform', (d, i) => {
-    //     return 'translate(' + legnedScale(d) + ',0)';
-    //   });
-
-
-    // legend.append('rect')
-    //   .attr('x', 0)
-    //   .attr('width', 16)
-    //   .attr('height', 16)
-    //   .attr('fill', d => this.getColorCode(d));
-
-    // legend.append('text')
-    //   .attr('x', 20)
-    //   .attr('y', 9.5)
-    //   .attr('dy', '0.32em')
-    //   .text(function (d) { return d; });
-
   }
 
   @HostListener('window:resize', ['$event'])
   onresize(event) {
-    console.log('resize!');
-
-
     this.updateChart(this.jsonData, this.categories, this.projectionData.getPlans(), this.projectionData.getPeriods(),
       this.projectionData.getCurrentProposed());
-
-
     this.createLegend();
-
-
-    // this.updateChart(this.proposalJsonData);
   }
 
 
