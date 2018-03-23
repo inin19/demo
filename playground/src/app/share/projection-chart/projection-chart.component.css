@@ -1,5 +1,5 @@
 #chart{
-    height: 500px;
+    height: 400px;
     /* background-color: whitesmoke; */
 }
 
@@ -26,13 +26,13 @@ ul li {
 
 .tick text {
     font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
-    font-size: 14px;
+    font-size: 12px;
     fill:#666;
 }
 
 .legend text {
     font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
-    font-size: 12px;
+    font-size: 10px;
     fill:#666;
 }
 

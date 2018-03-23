@@ -1,9 +1,6 @@
-import { Component, OnInit, OnChanges, ViewChild, Input, ElementRef, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, OnChanges, ViewChild, Input, ElementRef, ViewEncapsulation, HostListener } from '@angular/core';
 import { ProjectionData } from './../model/projectionData.model';
-import { FormControl } from '@angular/forms';
-// import { MatSelectChange, MatSelect } from '@angular/material/select';
 import * as d3 from 'd3';
-// import * as legend from 'd3-svg-legend';
 
 
 @Component({
@@ -24,7 +21,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
   @Input() private jsonData: Array<any>;
 
-  private margin: any = { top: 60, right: 60, bottom: 30, left: 60 };
+  private margin: any = { top: 60, right: 20, bottom: 30, left: 40 };
   private chart: any;
   private width: number;
   private height: number;
@@ -75,7 +72,6 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
   // use new UI
 
-  planForms: FormControl;
 
 
 
@@ -87,7 +83,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
     if (this.chart) {
 
-      this.CreateChartData();
+      this.createChartData();
       this.updateChart(this.jsonData, this.categories, this.projectionData.getPlans(), this.projectionData.getPeriods(),
         this.projectionData.getCurrentProposed());
       this.createSelector();
@@ -103,21 +99,11 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
     // console.log(this.getColorCode('TAX'));
 
 
-    this.CreateChartData();
-
-    this.planForms = new FormControl();
-
-
-
+    this.createChartData();
     this.createChart();
-
     this.createSelector();
-
-
-
     this.updateChart(this.jsonData, this.categories, this.projectionData.getPlans(), this.projectionData.getPeriods(),
       this.projectionData.getCurrentProposed());
-    //    this.createLegend();
 
     this.createLegend();
 
@@ -386,6 +372,25 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
   updateChart(jsonData: Array<any>, categories: Array<string>,
     plans?: Array<number>, periods?: Array<number>, currentProposed?: Array<string>) {
 
+    // update size
+    this.element = this.chartContainer.nativeElement;
+    this.width = this.element.offsetWidth - this.margin.left - this.margin.right;
+    this.height = this.element.offsetHeight - this.margin.top - this.margin.bottom;
+
+
+    this.x0Scale
+      .rangeRound([0, this.width]);
+
+    this.x1Scale
+      .range([0, this.x0Scale.bandwidth()]);
+
+    this.yScale
+      .range([this.height, 0]);
+    // end update size
+
+
+
+
     this.projectionData.processGraphData(jsonData, categories, plans, periods, currentProposed);
 
     this.graphData = this.projectionData.getGraphData();
@@ -467,7 +472,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
   }
 
 
-  CreateChartData() {
+  createChartData() {
     this.projectionData = new ProjectionData(this.jsonData, this.categories);
     this.graphData = this.projectionData.getGraphData();
   }
@@ -478,38 +483,154 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
   createLegend() {
 
+    // update size
+    this.element = this.chartContainer.nativeElement;
+
+    console.log(this.element.offsetWidth);
+
     const legnedScale = d3.scaleBand().domain(this.selectedCategories)
       .rangeRound([0, this.element.offsetWidth]);
 
 
-    const legend = d3.select('#chart svg').append('g')
+
+    // pattern
+
+    // update chart
+    // let groups = this.chart.selectAll('.group')
+    //   .data(this.graphData);
+
+    // groups.exit().remove();
+
+
+
+    // // update existing groups
+    // groups
+    //   .attr('transform', d => 'translate(' + this.x0Scale(d['period']) + ',0)');
+
+    // // adding new groups
+    // groups
+    //   .enter().append('g')
+    //   .classed('group', true)
+    //   .attr('transform', d => 'translate(' + this.x0Scale(d['period']) + ',0)');
+
+
+
+
+    let legend = d3.select('#chart svg').selectAll('.legend')
+      .data(this.selectedCategories);
+
+    // console.log(legend);
+
+
+    legend.exit().remove();
+
+    // // update existing legend
+    legend
+      .attr('transform', (d, i) => {
+        return 'translate(' + legnedScale(d) + ',0)';
+      });
+
+    // // adding new legend
+
+    const abc = legend
+      .enter().append('g')
       .classed('legend', true)
-      .attr('font-family', 'sans-serif')
-      .attr('font-size', 10)
-      // .attr('transform', `translate(${this.margin.left},0)`)
-      // .attr('text-anchor', 'end')
-      .selectAll('.legend')
-      .data(this.selectedCategories)
-      .enter()
-      .append('g')
       .attr('transform', (d, i) => {
         return 'translate(' + legnedScale(d) + ',0)';
       });
 
 
-    legend.append('rect')
+    // rejoin data VERY IMPORTANT
+    legend = d3.select('#chart svg').selectAll('.legend')
+      .data(this.selectedCategories);
+
+    // console.log(legend);
+
+    const rects = legend.selectAll('rect')
+      .data(d => {
+        // console.log(d);
+        return [d];
+      });
+
+    rects.exit().remove();
+
+
+    const legendText = legend.selectAll('text')
+      .data(d => {
+        // console.log(d);
+        return [d];
+      });
+
+    legendText.exit().remove();
+
+
+
+
+    rects
+      .enter()
+      .append('rect')
+      .transition()
       .attr('x', 0)
       .attr('width', 16)
       .attr('height', 16)
       .attr('fill', d => this.getColorCode(d));
 
-    legend.append('text')
+    legendText
+      .enter()
+      .append('text')
+      .transition()
       .attr('x', 20)
       .attr('y', 9.5)
       .attr('dy', '0.32em')
       .text(function (d) { return d; });
 
+
+
+
+    // const legend = d3.select('#chart svg').append('g')
+    //   .classed('legend', true)
+    //   .attr('font-family', 'sans-serif')
+    //   .attr('font-size', 10)
+    //   // .attr('transform', `translate(${this.margin.left},0)`)
+    //   // .attr('text-anchor', 'end')
+    //   .selectAll('.legend')
+    //   .data(this.selectedCategories)
+    //   .enter()
+    //   .append('g')
+    //   .attr('transform', (d, i) => {
+    //     return 'translate(' + legnedScale(d) + ',0)';
+    //   });
+
+
+    // legend.append('rect')
+    //   .attr('x', 0)
+    //   .attr('width', 16)
+    //   .attr('height', 16)
+    //   .attr('fill', d => this.getColorCode(d));
+
+    // legend.append('text')
+    //   .attr('x', 20)
+    //   .attr('y', 9.5)
+    //   .attr('dy', '0.32em')
+    //   .text(function (d) { return d; });
+
   }
+
+  @HostListener('window:resize', ['$event'])
+  onresize(event) {
+    console.log('resize!');
+
+
+    this.updateChart(this.jsonData, this.categories, this.projectionData.getPlans(), this.projectionData.getPeriods(),
+      this.projectionData.getCurrentProposed());
+
+
+    this.createLegend();
+
+
+    // this.updateChart(this.proposalJsonData);
+  }
+
 
 
 }
