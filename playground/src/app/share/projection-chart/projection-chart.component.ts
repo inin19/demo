@@ -96,7 +96,6 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
     this.categories = ['EMPLOYER_PREMIUM', 'FUNDING_GAP', 'MEMBER_PREMIUM', 'TAX', 'FEES'];
 
 
-    // console.log(this.getColorCode('TAX'));
 
 
     this.createChartData();
@@ -116,9 +115,7 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
 
 
-  allClick() {
-    console.log('log this');
-  }
+
 
   createSelector() {
 
@@ -378,6 +375,11 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
     this.height = this.element.offsetHeight - this.margin.top - this.margin.bottom;
 
 
+    d3
+      .select('#chart svg')
+      .attr('width', this.element.offsetWidth)
+      .attr('height', this.element.offsetHeight);
+
     this.x0Scale
       .rangeRound([0, this.width]);
 
@@ -517,11 +519,9 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
     legend = d3.select('#chart svg').selectAll('.legend')
       .data(this.selectedCategories);
 
-    // console.log(legend);
 
     const rects = legend.selectAll('rect')
       .data(d => {
-        // console.log(d);
         return [d];
       });
 
@@ -530,7 +530,6 @@ export class ProjectionChartComponent implements OnInit, OnChanges {
 
     const legendText = legend.selectAll('text')
       .data(d => {
-        // console.log(d);
         return [d];
       });
 
